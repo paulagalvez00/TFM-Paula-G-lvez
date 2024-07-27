@@ -1,0 +1,233 @@
+---
+title: "códigos r"
+author: "Paula Gálvez Parreño"
+date: "2024-01-04"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Librerías y Datos
+```{r}
+library(sp)
+library(spdep)
+library(readxl)
+library(sf)
+library(igraph)
+library(dplyr)
+library(gridExtra)
+
+# Datos
+## Obtén el directorio de trabajo actual
+directorio_actual <- getwd() 
+
+
+## Lectura de los datos de privación. 
+datos_medea <- read_excel(file.path(directorio_actual, "datos", "brutos", "datos_medea3_privacion_2001_valencia.xlsx"))
+rank <- datos_medea[, 4]
+```
+
+
+# Preparamos los datos de dependencia de privación RW1 y RW2:
+## Datos dependencia privación. RW1.
+
+```{r}
+## Lo mismo que con la matriz y grafo, pero con una función que he creado manualmente.
+crear_vecindades <- function(data) {
+  n <- nrow(data)
+  vecindades <- vector("list", length = n)
+  
+  for (i in 1:n) {
+    vecinos <- c()
+    
+    for (j in 1:n) {
+      if (data[i, ] == 1) {
+        if (data[j, ] == 2) {
+          vecinos <- c(vecinos, j)
+        }
+      } else if (data[i, ] == 531) {
+        if (data[j, ] == 530) {
+          vecinos <- c(vecinos, j)
+        }
+      } else {
+        if (data[j, ] %in% c((data[i, ] - 1), (data[i, ] + 1))) {
+          vecinos <- c(vecinos, j)
+        }
+      }
+    }
+    
+    vecindades[[i]] <- vecinos
+  }
+  
+  return(vecindades)
+}
+
+# Ejemplo de uso
+vecindades_resultado <- crear_vecindades(rank)
+```
+
+
+```{r}
+num.2 <- sapply(vecindades_resultado, length) #Obtener el número de vecinos
+index.2 <- c(0, cumsum(num.2))
+adj.2 <- unlist(vecindades_resultado)
+
+priv.wb <- list(adj.2, num.2)
+save(priv.wb, file = file.path(directorio_actual, "datos", "brutos", "priv.wb.rw1.Rdata"))
+```
+
+
+## Datos dependencia privación. RW2.
+
+En primer lugar, tenemos que obtener la nueva lista de vecinos para RW2.
+
+```{r}
+## Vamos a crear una matriz de adyacencia en función de la privación.
+#He cogido el código que he creado antes.
+elementos <- c(1:531)
+orden_renta <- rank$rank #ordenamos la variable de rango 1-531
+
+##Crear una matriz de adyacencia boleana
+resta_dif <- function(x, y) {
+  diferencia_absoluta <- abs(x - y)
+  return(diferencia_absoluta == 1 | diferencia_absoluta == -1 | diferencia_absoluta == 2 | diferencia_absoluta == -2)
+}
+
+matriz_adyacencia <- outer(orden_renta, orden_renta, function(x,y) resta_dif(x,y))
+
+##matriz de adyacencia numérica, partiendo de boleana
+matriz_adyacencia_numerica <- (as.numeric(matriz_adyacencia))
+
+#Reshape a una matriz cuadrada
+dim(matriz_adyacencia_numerica) <- c(length(orden_renta), length(orden_renta))
+
+#Crear un objeto de grafo desde la matriz de adyacencia
+grafo <- graph.adjacency(matriz_adyacencia, mode = "undirected", diag = FALSE)
+
+#Obtener la lista de vecindades para cada nodo. 
+#vcount se utiliza para contar el número de vértices en el grafo.
+#La función lapply en R es una función que se utiliza para aplicar una función a cada elemento de una lista y devuelve una lista con los resultados.
+vector_adyacencia <- lapply(1:vcount(grafo), function(i) neighbors(grafo, i))
+```
+
+
+
+
+### Vector de pesos para RW2
+
+*Datos dependencia privación. RW2 con los nuevos cambios.*
+
+En primer lugar, pasamos a definir qué vecinos corresponden a las secciones censales de menor y mayor privación, así como de los vecinos de orden 1 de estas últimas. 
+
+Es decir, estamos buscando los vecinos de las secciones censales que se encontrarían en los extremos de la variable de rango de privación, los dos primeros y los dos últimos, ya que estos merecen un trato especial a la hora de dar los valores de los pesos.
+
+```{r}
+# secciones censales con menor y mayor privación
+cat("los vecinos de la sección censal", which(orden_renta==1),
+    ", con un valor de rank de", orden_renta[which(orden_renta==1)], "son:", "\n", 
+    "De orden 1:", which(orden_renta==2), ",rank=",
+    orden_renta[which(orden_renta==2)], "w=2", "\n", 
+    "De orden 2:", which(orden_renta==3), ",rank=",
+    orden_renta[which(orden_renta==3)], "w=-1", "\n", "\n")
+
+cat("los vecinos de la sección censal", which(orden_renta==531),
+    ", con un valor de rank de", orden_renta[which(orden_renta==531)], "son:", "\n", 
+    "De orden 1:", which(orden_renta==530), ",rank=",
+    orden_renta[which(orden_renta==530)], "w=2", "\n", 
+    "De orden 2:", which(orden_renta==529), ",rank=",
+    orden_renta[which(orden_renta==529)], "w=-1", "\n", "\n")
+
+# Secciones censales vecinas de orden 1 de las anteriores.vecinos de las última rw2
+cat("los vecinos de la sección censal", which(orden_renta==2),
+    ", con un valor de rank de", orden_renta[which(orden_renta==2)], "son:", "\n", 
+    "De orden 1 por la izq:", which(orden_renta==1), ",rank=",
+    orden_renta[which(orden_renta==1)], "w=2","\n", 
+    "De orden 1 por la drch:", which(orden_renta==3), ",rank=",
+    orden_renta[which(orden_renta==3)], "w=4", "\n", 
+    "De orden 2:", which(orden_renta==4), ",rank=",
+    orden_renta[which(orden_renta==4)], "w=-1", "\n", "\n")
+
+cat("los vecinos de la sección censal", which(orden_renta==530),
+    ", con un valor de rank de", orden_renta[which(orden_renta==530)], "son:", "\n", 
+    "De orden 1 por la izq:", which(orden_renta==529), ",rank=",
+    orden_renta[which(orden_renta==529)], "w=2", "\n", 
+    "De orden 1 por la drch:", which(orden_renta==531), ",rank=",
+    orden_renta[which(orden_renta==531)], "w=4", "\n", 
+    "De orden 2:", which(orden_renta==528), ",rank=",
+    orden_renta[which(orden_renta==528)], "w=-1", "\n", "\n")
+
+```
+
+
+```{r}
+# Definir la función w.rw2
+w.rw2 <- function(x, y) {
+  if (x == 2 | x == 530){
+   resta <- x - y
+   pesos <- numeric(length(x))
+   pesos[resta == 1] <- 2
+   pesos[resta == -1] <- 4
+   pesos[resta == 2 | resta == -2] <- -1
+  }
+  
+  else if (x == 1 | x == 531){
+   resta <- x - y
+   pesos <- numeric(length(x))
+   pesos[resta == 1 | resta == -1] <- 2
+   pesos[resta == 2 | resta == -2] <- -1 
+  }
+  
+  else {
+  resta <- x - y
+  pesos <- numeric(length(x))
+  pesos[resta == 1 | resta == -1] <- 4
+  pesos[resta == 2 | resta == -2] <- -1
+  }
+
+  return(pesos)
+}
+
+
+# Aplicar la función a cada par de elementos de orden_renta
+matriz_pesos <- outer(orden_renta, orden_renta, Vectorize(w.rw2))
+
+# Obtener una lista con los valores distintos de 0 para cada fila
+lista_resultados <- apply(matriz_pesos, 1, function(fila) fila[fila != 0])
+```
+
+
+```{r}
+# prec.rw2 corresponde con la diagonal de la matriz de precisión Q.
+prec.rw2.fun <- function(x) {
+  prec <- numeric(length(x))
+  
+  # Asignar 5 a los elementos igual a 2 o 530
+  prec[x == 2 | x == 530] <- 5
+  
+  # Asignar 1 a los elementos igual a 1 o 531
+  prec[x == 1 | x == 531] <- 1
+  
+  # Asignar 6 a los demás elementos
+  prec[!(x %in% c(1, 2, 530, 531))] <- 6
+
+  return(prec)
+}
+
+# Aplicar la función a cada elemento de orden_renta
+prec.rw2 <- prec.rw2.fun(orden_renta)
+# vector que recoge el número de vecinos asociados a cada sección censal.
+num.rw2 <- sapply(vector_adyacencia, length)
+# suma acumulativa del número de vecinos.
+index.rw2 <- c(0, cumsum(num.rw2))
+# vector de adyacencias
+adj.rw2 <- unlist(vector_adyacencia)
+# vector de pesos
+w.rw2 <- unlist(lista_resultados)
+
+# Guardamos en la carpeta correspondiente los datos.
+priv.wb.rw2 <- list(adj.rw2, prec.rw2, num.rw2, w.rw2)
+save(priv.wb.rw2, file = file.path(directorio_actual, "datos", "brutos", "priv.wb.rw2.Rdata"))
+```
+

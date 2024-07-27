@@ -1,0 +1,1537 @@
+---
+title: "Ejecutable modelos WB"
+author: "Paula Gálvez Parreño"
+date: "2024-01-16"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+# Librerías y datos
+```{r}
+# Obtén el directorio de trabajo actual
+directorio_actual <- getwd()
+
+# Cargamos librerías 
+source(file.path(directorio_actual, "r", "configuracion.R"))
+
+# Lectura y preparación de los datos 
+
+## Carga los datos desde el archivo
+Obs <- as.data.frame(Obs)
+Exp <- as.data.frame(Exp)
+
+
+## Lectura de los datos de privación. 
+rank <- datos_medea[, 4]
+priv <- datos_medea[, 3]
+
+## Datos dependencia espacial vecindades: 
+adj.1<-carto.wb[["adj"]]; w.1<-carto.wb[["weights"]]; num.1<-carto.wb[["num"]] 
+index.1 <- c(0, cumsum(num.1))
+
+## Datos dependencia privación. RW1.
+adj.2<-priv.wb[[1]]; num.2<-priv.wb[[2]]; index.2 <- c(0, cumsum(num.2))
+
+## Datos dependencia privación. RW2
+adj.rw2 <- priv.wb.rw2[[1]]; prec.rw2 <- priv.wb.rw2[[2]]
+num.rw2 <- priv.wb.rw2[[3]]; w.rw2 <- priv.wb.rw2[[4]]
+index.rw2 <- c(0, cumsum(num.rw2))
+```
+
+# Directorio WinBugs
+```{r}
+# Directorio ordenador yo :)
+directorio.winbugs<-("c:/Users/User/OneDrive/Escritorio/master/Primer curso/Modelización avanzada/Modelos Jerárquicos Bayesianos/Modelos Jerárquicos/ProgramaWinBUGS/WinBUGS14/WinBUGS14/")
+```
+
+
+
+# Modelo LCAR normal
+```{r}
+mod.lcar <- function(){
+  for (i in 1:n){
+    Obs[i] ~ dpois(mu[i])
+    log(mu[i]) <- log(Exp[i]) + m + sd.ler*ler[i] 
+    
+    ler[i] ~ dnorm(mean.ler[i], prec.ler[i])
+    prec.ler[i]<-((1-lambda.1) + lambda.1*num.1[i])
+    mean.ler[i]<-(sum(ler.adj.1[(index.1[i]+1):index.1[i+1]])*
+                    lambda.1) /((1-lambda.1) + lambda.1*num.1[i])
+    
+    R[i]<-exp(m + sd.ler*ler[i])
+    
+  }
+  
+  for(j in 1:n.adj.1){
+    ler.adj.1[j] <- ler[adj.1[j]]
+  }
+  
+  # Restricción suma cero
+  mean.ler.all <- mean(ler[])
+  cero ~ dnorm(mean.ler.all, 10000)
+  
+  # Previas
+  m ~ dflat()
+  sd.ler ~ dunif(0,10)
+  # ATENCION LAMBDA TIENE QUE ESTAR ENTRE 0 y 1..
+  lambda.1 ~ dunif(0,1)
+}
+
+
+#iniciales
+inits <- function() {
+  list(m=rnorm(1,0,1), ler=rnorm(531,0,1), sd.ler=runif(1), lambda.1=runif(1))
+}
+
+#parámetros
+param <- c("m", "sd.ler","lambda.1", "R")
+```
+
+
+
+## Causas mortalidad: código ejecutable
+### 01_sida
+```{r}
+#datos
+datos <- list(Obs=Obs$"01_sida", Exp=Exp$"01_sida",
+              n=length(Obs$"01_sida"), adj.1=adj.1, num.1=num.1, 
+              index.1=index.1, n.adj.1=length(adj.1), cero=0)
+
+# Llámamos a WB
+set.seed(2)
+resul.lcar1<- bugs(data = datos, inits = inits, parameters = param, model = mod.lcar, n.burnin = 1000, n.iter = 5000, bugs.directory = directorio.winbugs)
+
+save(resul.lcar1, file =  file.path(directorio_actual, "datos", "resultados", "sida", "resul.lcar1.Rdata"))
+```
+
+### 02_cancer_estomago
+```{r}
+#datos
+datos <- list(Obs=Obs$"02_cancer_estomago", Exp=Exp$"02_cancer_estomago",
+              n=length(Obs$"02_cancer_estomago"), adj.1=adj.1, num.1=num.1, 
+              index.1=index.1, n.adj.1=length(adj.1), cero=0)
+
+# Llámamos a WB
+set.seed(2)
+resul.lcar1<- bugs(data = datos, inits = inits, parameters = param, model = mod.lcar, n.burnin = 1000, n.iter = 5000, bugs.directory = directorio.winbugs)
+
+save(resul.lcar1, file =  file.path(directorio_actual, "datos", "resultados", "cancer_estomago", "resul.lcar1.Rdata"))
+```
+### 03_cancer_colon
+```{r}
+#datos
+datos <- list(Obs=Obs$"03_cancer_colon", Exp=Exp$"03_cancer_colon",
+              n=length(Obs$"03_cancer_colon"), adj.1=adj.1, num.1=num.1, 
+              index.1=index.1, n.adj.1=length(adj.1), cero=0)
+
+# Llámamos a WB
+set.seed(2)
+resul.lcar1<- bugs(data = datos, inits = inits, parameters = param, model = mod.lcar, n.burnin = 1000, n.iter = 5000, bugs.directory = directorio.winbugs)
+
+save(resul.lcar1, file =  file.path(directorio_actual, "datos", "resultados", "cancer_colon", "resul.lcar1.Rdata"))
+```
+### 04_cancer_recto
+```{r}
+#datos
+datos <- list(Obs=Obs$"04_cancer_recto", Exp=Exp$"04_cancer_recto",
+              n=length(Obs$"04_cancer_recto"), adj.1=adj.1, num.1=num.1, 
+              index.1=index.1, n.adj.1=length(adj.1), cero=0)
+
+# Llámamos a WB
+set.seed(2)
+resul.lcar1<- bugs(data = datos, inits = inits, parameters = param, model = mod.lcar, n.burnin = 1000, n.iter = 5000, bugs.directory = directorio.winbugs)
+
+save(resul.lcar1, file =  file.path(directorio_actual, "datos", "resultados", "cancer_recto", "resul.lcar1.Rdata"))
+```
+### 05_cancer_colorectal
+```{r}
+#datos
+datos <- list(Obs=Obs$"05_cancer_colorectal", Exp=Exp$"05_cancer_colorectal",
+              n=length(Obs$"05_cancer_colorectal"), adj.1=adj.1, num.1=num.1, 
+              index.1=index.1, n.adj.1=length(adj.1), cero=0)
+
+# Llámamos a WB
+set.seed(2)
+resul.lcar1<- bugs(data = datos, inits = inits, parameters = param, model = mod.lcar, n.burnin = 1000, n.iter = 5000, bugs.directory = directorio.winbugs)
+
+save(resul.lcar1, file =  file.path(directorio_actual, "datos", "resultados", "cancer_colorectal", "resul.lcar1.Rdata"))
+```
+### 06_cancer_laringe
+```{r}
+#datos
+datos <- list(Obs=Obs$"06_cancer_laringe", Exp=Exp$"06_cancer_laringe",
+              n=length(Obs$"06_cancer_laringe"), adj.1=adj.1, num.1=num.1, 
+              index.1=index.1, n.adj.1=length(adj.1), cero=0)
+
+# Llámamos a WB
+set.seed(2)
+resul.lcar1<- bugs(data = datos, inits = inits, parameters = param, model = mod.lcar, n.burnin = 1000, n.iter = 5000, bugs.directory = directorio.winbugs)
+
+save(resul.lcar1, file =  file.path(directorio_actual, "datos", "resultados", "cancer_laringe", "resul.lcar1.Rdata"))
+```
+### 07_cancer_pulmon
+```{r}
+#datos
+datos <- list(Obs=Obs$"07_cancer_pulmon", Exp=Exp$"07_cancer_pulmon",
+              n=length(Obs$"07_cancer_pulmon"), adj.1=adj.1, num.1=num.1, 
+              index.1=index.1, n.adj.1=length(adj.1), cero=0)
+
+# Llámamos a WB
+set.seed(2)
+resul.lcar1<- bugs(data = datos, inits = inits, parameters = param, model = mod.lcar, n.burnin = 1000, n.iter = 5000, bugs.directory = directorio.winbugs)
+
+save(resul.lcar1, file =  file.path(directorio_actual, "datos", "resultados", "cancer_pulmon", "resul.lcar1.Rdata"))
+```
+### 08_cancer_mama
+```{r}
+#datos
+datos <- list(Obs=Obs$"08_cancer_mama", Exp=Exp$"08_cancer_mama",
+              n=length(Obs$"08_cancer_mama"), adj.1=adj.1, num.1=num.1, 
+              index.1=index.1, n.adj.1=length(adj.1), cero=0)
+
+# Llámamos a WB
+set.seed(2)
+resul.lcar1<- bugs(data = datos, inits = inits, parameters = param, model = mod.lcar, n.burnin = 1000, n.iter = 5000, bugs.directory = directorio.winbugs)
+
+save(resul.lcar1, file =  file.path(directorio_actual, "datos", "resultados", "cancer_mama", "resul.lcar1.Rdata"))
+```
+### 09_cancer_prostata
+```{r}
+#datos
+datos <- list(Obs=Obs$"09_cancer_prostata", Exp=Exp$"09_cancer_prostata",
+              n=length(Obs$"09_cancer_prostata"), adj.1=adj.1, num.1=num.1, 
+              index.1=index.1, n.adj.1=length(adj.1), cero=0)
+
+# Llámamos a WB
+set.seed(2)
+resul.lcar1<- bugs(data = datos, inits = inits, parameters = param, model = mod.lcar, n.burnin = 1000, n.iter = 5000, bugs.directory = directorio.winbugs)
+
+save(resul.lcar1, file =  file.path(directorio_actual, "datos", "resultados", "cancer_prostata", "resul.lcar1.Rdata"))
+```
+
+### 10_cancer_vejiga
+```{r}
+#datos
+datos <- list(Obs=Obs$"10_cancer_vejiga", Exp=Exp$"10_cancer_vejiga",
+              n=length(Obs$"10_cancer_vejiga"), adj.1=adj.1, num.1=num.1, 
+              index.1=index.1, n.adj.1=length(adj.1), cero=0)
+
+# Llámamos a WB
+set.seed(2)
+resul.lcar1<- bugs(data = datos, inits = inits, parameters = param, model = mod.lcar, n.burnin = 1000, n.iter = 5000, bugs.directory = directorio.winbugs)
+
+save(resul.lcar1, file =  file.path(directorio_actual, "datos", "resultados", "cancer_vejiga", "resul.lcar1.Rdata"))
+```
+### 11_cancer_hemato
+```{r}
+#datos
+datos <- list(Obs=Obs$"11_cancer_hemato", Exp=Exp$"11_cancer_hemato",
+              n=length(Obs$"11_cancer_hemato"), adj.1=adj.1, num.1=num.1, 
+              index.1=index.1, n.adj.1=length(adj.1), cero=0)
+
+# Llámamos a WB
+set.seed(2)
+resul.lcar1<- bugs(data = datos, inits = inits, parameters = param, model = mod.lcar, n.burnin = 1000, n.iter = 5000, bugs.directory = directorio.winbugs)
+
+save(resul.lcar1, file =  file.path(directorio_actual, "datos", "resultados", "cancer_hemato", "resul.lcar1.Rdata"))
+```
+### 12_diabetes
+```{r}
+#datos
+datos <- list(Obs=Obs$"12_diabetes", Exp=Exp$"12_diabetes",
+              n=length(Obs$"12_diabetes"), adj.1=adj.1, num.1=num.1, 
+              index.1=index.1, n.adj.1=length(adj.1), cero=0)
+
+# Llámamos a WB
+set.seed(2)
+resul.lcar1<- bugs(data = datos, inits = inits, parameters = param, model = mod.lcar, n.burnin = 1000, n.iter = 5000, bugs.directory = directorio.winbugs)
+
+save(resul.lcar1, file =  file.path(directorio_actual, "datos", "resultados", "diabetes", "resul.lcar1.Rdata"))
+```
+### 13_ttos_mentales_organicos
+```{r}
+#datos
+datos <- list(Obs=Obs$"13_ttos_mentales_organicos", Exp=Exp$"13_ttos_mentales_organicos",
+              n=length(Obs$"13_ttos_mentales_organicos"), adj.1=adj.1, num.1=num.1, 
+              index.1=index.1, n.adj.1=length(adj.1), cero=0)
+
+# Llámamos a WB
+set.seed(2)
+resul.lcar1<- bugs(data = datos, inits = inits, parameters = param, model = mod.lcar, n.burnin = 1000, n.iter = 5000, bugs.directory = directorio.winbugs)
+
+save(resul.lcar1, file =  file.path(directorio_actual, "datos", "resultados", "mentales_orgánicos", "resul.lcar1.Rdata"))
+```
+### 14_alzheimer
+```{r}
+#datos
+datos <- list(Obs=Obs$"14_alzheimer", Exp=Exp$"14_alzheimer",
+              n=length(Obs$"14_alzheimer"), adj.1=adj.1, num.1=num.1, 
+              index.1=index.1, n.adj.1=length(adj.1), cero=0)
+
+# Llámamos a WB
+set.seed(2)
+resul.lcar1<- bugs(data = datos, inits = inits, parameters = param, model = mod.lcar, n.burnin = 1000, n.iter = 5000, bugs.directory = directorio.winbugs)
+
+save(resul.lcar1, file =  file.path(directorio_actual, "datos", "resultados", "alzheimer", "resul.lcar1.Rdata"))
+```
+### 15_demencia
+```{r}
+#datos
+datos <- list(Obs=Obs$"15_demencia", Exp=Exp$"15_demencia",
+              n=length(Obs$"15_demencia"), adj.1=adj.1, num.1=num.1, 
+              index.1=index.1, n.adj.1=length(adj.1), cero=0)
+
+# Llámamos a WB
+set.seed(2)
+resul.lcar1<- bugs(data = datos, inits = inits, parameters = param, model = mod.lcar, n.burnin = 1000, n.iter = 5000, bugs.directory = directorio.winbugs)
+
+save(resul.lcar1, file =  file.path(directorio_actual, "datos", "resultados", "demencia", "resul.lcar1.Rdata"))
+```
+### 16_isquemica_corazon
+```{r}
+#datos
+datos <- list(Obs=Obs$"16_isquemica_corazon", Exp=Exp$"16_isquemica_corazon",
+              n=length(Obs$"16_isquemica_corazon"), adj.1=adj.1, num.1=num.1, 
+              index.1=index.1, n.adj.1=length(adj.1), cero=0)
+
+# Llámamos a WB
+set.seed(2)
+resul.lcar1<- bugs(data = datos, inits = inits, parameters = param, model = mod.lcar, n.burnin = 1000, n.iter = 5000, bugs.directory = directorio.winbugs)
+
+save(resul.lcar1, file =  file.path(directorio_actual, "datos", "resultados", "isquemica", "resul.lcar1.Rdata"))
+```
+### 17_ictus
+```{r}
+#datos
+datos <- list(Obs=Obs$"17_ictus", Exp=Exp$"17_ictus",
+              n=length(Obs$"17_ictus"), adj.1=adj.1, num.1=num.1, 
+              index.1=index.1, n.adj.1=length(adj.1), cero=0)
+
+# Llámamos a WB
+set.seed(2)
+resul.lcar1<- bugs(data = datos, inits = inits, parameters = param, model = mod.lcar, n.burnin = 1000, n.iter = 5000, bugs.directory = directorio.winbugs)
+
+save(resul.lcar1, file =  file.path(directorio_actual, "datos", "resultados", "ictus", "resul.lcar1.Rdata"))
+```
+### 18_epoc
+```{r}
+#datos
+datos <- list(Obs=Obs$"18_epoc", Exp=Exp$"18_epoc",
+              n=length(Obs$"18_epoc"), adj.1=adj.1, num.1=num.1, 
+              index.1=index.1, n.adj.1=length(adj.1), cero=0)
+
+# Llámamos a WB
+set.seed(2)
+resul.lcar1<- bugs(data = datos, inits = inits, parameters = param, model = mod.lcar, n.burnin = 1000, n.iter = 5000, bugs.directory = directorio.winbugs)
+
+save(resul.lcar1, file =  file.path(directorio_actual, "datos", "resultados", "epoc", "resul.lcar1.Rdata"))
+```
+
+### 19_cirrosis
+```{r}
+#datos
+datos <- list(Obs=Obs$"19_cirrosis", Exp=Exp$"19_cirrosis",
+              n=length(Obs$"19_cirrosis"), adj.1=adj.1, num.1=num.1, 
+              index.1=index.1, n.adj.1=length(adj.1), cero=0)
+
+# Llámamos a WB
+set.seed(2)
+resul.lcar1<- bugs(data = datos, inits = inits, parameters = param, model = mod.lcar, n.burnin = 1000, n.iter = 10000, bugs.directory = directorio.winbugs) 
+
+save(resul.lcar1, file =  file.path(directorio_actual, "datos", "resultados", "cirrosis", "resul.lcar1.Rdata"))
+```
+
+```{r}
+load(file.path(directorio_actual, "datos", "resultados", "cirrosis","resul.lcar1.Rdata"))
+
+round(resul.lcar1$summary, 3)
+```
+
+
+### 20_suicidios
+```{r}
+#datos
+datos <- list(Obs=Obs$"20_suicidios", Exp=Exp$"20_suicidios",
+              n=length(Obs$"20_suicidios"), adj.1=adj.1, num.1=num.1, 
+              index.1=index.1, n.adj.1=length(adj.1), cero=0)
+
+# Llámamos a WB
+set.seed(2)
+resul.lcar1<- bugs(data = datos, inits = inits, parameters = param, model = mod.lcar, n.burnin = 1000, n.iter = 5000, bugs.directory = directorio.winbugs)
+
+save(resul.lcar1, file =  file.path(directorio_actual, "datos", "resultados", "suicidios", "resul.lcar1.Rdata"))
+```
+### 21_accidente_trafico
+```{r}
+#datos
+datos <- list(Obs=Obs$"21_accidente_trafico", Exp=Exp$"21_accidente_trafico",
+              n=length(Obs$"21_accidente_trafico"), adj.1=adj.1, num.1=num.1, 
+              index.1=index.1, n.adj.1=length(adj.1), cero=0)
+
+# Llámamos a WB
+set.seed(2)
+resul.lcar1<- bugs(data = datos, inits = inits, parameters = param, model = mod.lcar, n.burnin = 1000, n.iter = 5000, bugs.directory = directorio.winbugs)
+
+save(resul.lcar1, file =  file.path(directorio_actual, "datos", "resultados", "accidente_trafico", "resul.lcar1.Rdata"))
+```
+### 22_todas_causas
+```{r}
+#datos
+datos <- list(Obs=Obs$"22_todas_causas", Exp=Exp$"22_todas_causas",
+              n=length(Obs$"22_todas_causas"), adj.1=adj.1, num.1=num.1, 
+              index.1=index.1, n.adj.1=length(adj.1), cero=0)
+
+# Llámamos a WB
+set.seed(2)
+resul.lcar1<- bugs(data = datos, inits = inits, parameters = param, model = mod.lcar, n.burnin = 1000, n.iter = 5000, bugs.directory = directorio.winbugs)
+
+save(resul.lcar1, file =  file.path(directorio_actual, "datos", "resultados", "todas_causas", "resul.lcar1.Rdata"))
+```
+
+
+
+
+# Modelo LCAR2 RW1 
+
+```{r}
+mod.lcar2.rw1 <- function(){
+  for (i in 1:n){
+    Obs[i] ~ dpois(mu[i])
+    log(mu[i]) <- log(Exp[i]) + m + sd.ler*ler[i] 
+    ler[i] ~ dnorm(mean.ler[i], prec.ler[i])
+    prec.ler[i] <- ((1-lambda.1-lambda.2) + lambda.1*num.1[i] + lambda.2*num.2[i])
+    
+    mean.ler[i] <- (((sum(ler.adj.1[(index.1[i]+1):index.1[i+1]])*lambda.1) +(sum(ler.adj.2[(index.2[i]+1):index.2[i+1]])*lambda.2))/((1-lambda.1-lambda.2) + lambda.1*num.1[i] +lambda.2*num.2[i]))
+    
+    R[i]<-exp(m+sd.ler*ler[i])
+  }
+  
+  for(j in 1:n.adj.1){
+    ler.adj.1[j]<-ler[adj.1[j]]
+  }
+  
+  for(j in 1:n.adj.2){
+    ler.adj.2[j]<-ler[adj.2[j]]
+  }
+  
+  # Restricción suma cero
+  mean.ler.all <- mean(ler[])
+  cero ~ dnorm(mean.ler.all, 10000)
+  
+  # Previas
+  m ~ dflat()
+  sd.ler ~ dunif(0,10)
+  lambda.1 <- q1
+  lambda.2 <- (1-q1)*q2
+  q1 ~ dbeta(1,2)
+  q2 ~ dbeta(1,1)
+}
+
+#iniciales
+inits.2 <- function() {
+  list(m=rnorm(1,0,1), ler=rnorm(531,0,1), sd.ler=runif(1),
+       q1=runif(1), q2=runif(1))
+}
+
+#parámetros
+param.2 <- c("m", "sd.ler","lambda.1", "lambda.2", "q1", "q2", "R")
+```
+
+
+
+## Causas mortalidad: código ejecutable
+### 01_sida
+```{r}
+#datos
+datos.2 <- list(Obs=Obs$"01_sida", Exp=Exp$"01_sida",
+              n=length(Obs$"01_sida"), adj.1=adj.1, num.1=num.1, 
+              index.1=index.1, n.adj.1=length(adj.1), adj.2=adj.2, num.2=num.2, 
+              index.2=index.2, n.adj.2=length(adj.2), cero=0)
+
+# Llámamos a WB
+set.seed(2)
+resul.lcar2.rw1<- bugs(data = datos.2, inits = inits.2, parameters = param.2, model = mod.lcar2.rw1, n.burnin = 1000, n.iter = 5000 , bugs.directory = directorio.winbugs)
+
+save(resul.lcar2.rw1, file =  file.path(directorio_actual, "datos", "resultados", "sida", "resul.lcar2.rw1.Rdata"))
+```
+### 02_cancer_estomago
+```{r}
+#datos
+datos.2 <- list(Obs=Obs$"02_cancer_estomago", Exp=Exp$"02_cancer_estomago",
+              n=length(Obs$"02_cancer_estomago"), adj.1=adj.1, num.1=num.1, 
+              index.1=index.1, n.adj.1=length(adj.1), adj.2=adj.2, num.2=num.2, 
+              index.2=index.2, n.adj.2=length(adj.2), cero=0)
+
+# Llámamos a WB
+set.seed(2)
+resul.lcar2.rw1<- bugs(data = datos.2, inits = inits.2, parameters = param.2, model = mod.lcar2.rw1, n.burnin = 1000, n.iter = 5000 , bugs.directory = directorio.winbugs)
+
+save(resul.lcar2.rw1, file =  file.path(directorio_actual, "datos", "resultados", "cancer_estomago", "resul.lcar2.rw1.Rdata"))
+```
+### 03_cancer_colon
+```{r}
+#datos
+datos.2 <- list(Obs=Obs$"03_cancer_colon", Exp=Exp$"03_cancer_colon",
+              n=length(Obs$"03_cancer_colon"), adj.1=adj.1, num.1=num.1, 
+              index.1=index.1, n.adj.1=length(adj.1), adj.2=adj.2, num.2=num.2, 
+              index.2=index.2, n.adj.2=length(adj.2), cero=0)
+
+# Llámamos a WB
+set.seed(2)
+resul.lcar2.rw1<- bugs(data = datos.2, inits = inits.2, parameters = param.2, model = mod.lcar2.rw1, n.burnin = 1000, n.iter = 5000 , bugs.directory = directorio.winbugs)
+
+save(resul.lcar2.rw1, file =  file.path(directorio_actual, "datos", "resultados", "cancer_colon", "resul.lcar2.rw1.Rdata"))
+```
+### 04_cancer_recto
+```{r}
+#datos
+datos.2 <- list(Obs=Obs$"04_cancer_recto", Exp=Exp$"04_cancer_recto",
+              n=length(Obs$"04_cancer_recto"), adj.1=adj.1, num.1=num.1, 
+              index.1=index.1, n.adj.1=length(adj.1), adj.2=adj.2, num.2=num.2, 
+              index.2=index.2, n.adj.2=length(adj.2), cero=0)
+
+# Llámamos a WB
+set.seed(2)
+resul.lcar2.rw1<- bugs(data = datos.2, inits = inits.2, parameters = param.2, model = mod.lcar2.rw1, n.burnin = 1000, n.iter = 5000 , bugs.directory = directorio.winbugs)
+
+save(resul.lcar2.rw1, file =  file.path(directorio_actual, "datos", "resultados", "cancer_recto", "resul.lcar2.rw1.Rdata"))
+```
+
+
+### 05_cancer_colorectal
+```{r}
+#datos
+datos.2 <- list(Obs=Obs$"05_cancer_colorectal", Exp=Exp$"05_cancer_colorectal",
+              n=length(Obs$"05_cancer_colorectal"), adj.1=adj.1, num.1=num.1, 
+              index.1=index.1, n.adj.1=length(adj.1), adj.2=adj.2, num.2=num.2, 
+              index.2=index.2, n.adj.2=length(adj.2), cero=0)
+
+# Llámamos a WB
+set.seed(2)
+resul.lcar2.rw1<- bugs(data = datos.2, inits = inits.2, parameters = param.2, model = mod.lcar2.rw1, n.burnin = 1000, n.iter = 5000 , bugs.directory = directorio.winbugs)
+
+save(resul.lcar2.rw1, file =  file.path(directorio_actual, "datos", "resultados", "cancer_colorectal", "resul.lcar2.rw1.Rdata"))
+```
+
+
+### 06_cancer_laringe
+```{r}
+#datos
+datos.2 <- list(Obs=Obs$"06_cancer_laringe", Exp=Exp$"06_cancer_laringe",
+              n=length(Obs$"06_cancer_laringe"), adj.1=adj.1, num.1=num.1, 
+              index.1=index.1, n.adj.1=length(adj.1), adj.2=adj.2, num.2=num.2, 
+              index.2=index.2, n.adj.2=length(adj.2), cero=0)
+
+# Llámamos a WB
+set.seed(2)
+resul.lcar2.rw1<- bugs(data = datos.2, inits = inits.2, parameters = param.2, model = mod.lcar2.rw1, n.burnin = 1000, n.iter = 5000 , bugs.directory = directorio.winbugs)
+
+save(resul.lcar2.rw1, file =  file.path(directorio_actual, "datos", "resultados", "cancer_laringe", "resul.lcar2.rw1.Rdata"))
+```
+
+
+### 07_cancer_pulmon
+```{r}
+#datos
+datos.2 <- list(Obs=Obs$"07_cancer_pulmon", Exp=Exp$"07_cancer_pulmon",
+              n=length(Obs$"07_cancer_pulmon"), adj.1=adj.1, num.1=num.1, 
+              index.1=index.1, n.adj.1=length(adj.1), adj.2=adj.2, num.2=num.2, 
+              index.2=index.2, n.adj.2=length(adj.2), cero=0)
+
+# Llámamos a WB
+set.seed(2)
+resul.lcar2.rw1<- bugs(data = datos.2, inits = inits.2, parameters = param.2, model = mod.lcar2.rw1, n.burnin = 1000, n.iter = 5000 , bugs.directory = directorio.winbugs)
+
+save(resul.lcar2.rw1, file =  file.path(directorio_actual, "datos", "resultados", "cancer_pulmon", "resul.lcar2.rw1.Rdata"))
+```
+
+
+### 08_cancer_mama
+```{r}
+#datos
+datos.2 <- list(Obs=Obs$"08_cancer_mama", Exp=Exp$"08_cancer_mama",
+              n=length(Obs$"08_cancer_mama"), adj.1=adj.1, num.1=num.1, 
+              index.1=index.1, n.adj.1=length(adj.1), adj.2=adj.2, num.2=num.2, 
+              index.2=index.2, n.adj.2=length(adj.2), cero=0)
+
+# Llámamos a WB
+set.seed(2)
+resul.lcar2.rw1<- bugs(data = datos.2, inits = inits.2, parameters = param.2, model = mod.lcar2.rw1, n.burnin = 1000, n.iter = 5000 , bugs.directory = directorio.winbugs)
+
+save(resul.lcar2.rw1, file =  file.path(directorio_actual, "datos", "resultados", "cancer_mama", "resul.lcar2.rw1.Rdata"))
+```
+
+
+### 09_cancer_prostata
+```{r}
+#datos
+datos.2 <- list(Obs=Obs$"09_cancer_prostata", Exp=Exp$"09_cancer_prostata",
+              n=length(Obs$"09_cancer_prostata"), adj.1=adj.1, num.1=num.1, 
+              index.1=index.1, n.adj.1=length(adj.1), adj.2=adj.2, num.2=num.2, 
+              index.2=index.2, n.adj.2=length(adj.2), cero=0)
+
+# Llámamos a WB
+set.seed(2)
+resul.lcar2.rw1<- bugs(data = datos.2, inits = inits.2, parameters = param.2, model = mod.lcar2.rw1, n.burnin = 1000, n.iter = 5000 , bugs.directory = directorio.winbugs)
+
+save(resul.lcar2.rw1, file =  file.path(directorio_actual, "datos", "resultados", "cancer_prostata", "resul.lcar2.rw1.Rdata"))
+```
+
+
+### 10_cancer_vejiga
+```{r}
+#datos
+datos.2 <- list(Obs=Obs$"10_cancer_vejiga", Exp=Exp$"10_cancer_vejiga",
+              n=length(Obs$"10_cancer_vejiga"), adj.1=adj.1, num.1=num.1, 
+              index.1=index.1, n.adj.1=length(adj.1), adj.2=adj.2, num.2=num.2, 
+              index.2=index.2, n.adj.2=length(adj.2), cero=0)
+
+# Llámamos a WB
+set.seed(2)
+resul.lcar2.rw1<- bugs(data = datos.2, inits = inits.2, parameters = param.2, model = mod.lcar2.rw1, n.burnin = 1000, n.iter = 5000 , bugs.directory = directorio.winbugs)
+
+save(resul.lcar2.rw1, file =  file.path(directorio_actual, "datos", "resultados", "cancer_vejiga", "resul.lcar2.rw1.Rdata"))
+```
+
+
+### 11_cancer_hemato
+```{r}
+#datos
+datos.2 <- list(Obs=Obs$"11_cancer_hemato", Exp=Exp$"11_cancer_hemato",
+              n=length(Obs$"11_cancer_hemato"), adj.1=adj.1, num.1=num.1, 
+              index.1=index.1, n.adj.1=length(adj.1), adj.2=adj.2, num.2=num.2, 
+              index.2=index.2, n.adj.2=length(adj.2), cero=0)
+
+# Llámamos a WB
+set.seed(2)
+resul.lcar2.rw1<- bugs(data = datos.2, inits = inits.2, parameters = param.2, model = mod.lcar2.rw1, n.burnin = 1000, n.iter = 5000 , bugs.directory = directorio.winbugs)
+
+save(resul.lcar2.rw1, file =  file.path(directorio_actual, "datos", "resultados", "cancer_hemato", "resul.lcar2.rw1.Rdata"))
+```
+
+
+### 12_diabetes
+```{r}
+#datos
+datos.2 <- list(Obs=Obs$"12_diabetes", Exp=Exp$"12_diabetes",
+              n=length(Obs$"12_diabetes"), adj.1=adj.1, num.1=num.1, 
+              index.1=index.1, n.adj.1=length(adj.1), adj.2=adj.2, num.2=num.2, 
+              index.2=index.2, n.adj.2=length(adj.2), cero=0)
+
+# Llámamos a WB
+set.seed(2)
+resul.lcar2.rw1<- bugs(data = datos.2, inits = inits.2, parameters = param.2, model = mod.lcar2.rw1, n.burnin = 1000, n.iter = 5000 , bugs.directory = directorio.winbugs)
+
+save(resul.lcar2.rw1, file =  file.path(directorio_actual, "datos", "resultados", "diabetes", "resul.lcar2.rw1.Rdata"))
+```
+
+
+### 13_ttos_mentales_organicos
+```{r}
+#datos
+datos.2 <- list(Obs=Obs$"13_ttos_mentales_organicos", Exp=Exp$"13_ttos_mentales_organicos",
+              n=length(Obs$"13_ttos_mentales_organicos"), adj.1=adj.1, num.1=num.1, 
+              index.1=index.1, n.adj.1=length(adj.1), adj.2=adj.2, num.2=num.2, 
+              index.2=index.2, n.adj.2=length(adj.2), cero=0)
+
+# Llámamos a WB
+set.seed(2)
+resul.lcar2.rw1<- bugs(data = datos.2, inits = inits.2, parameters = param.2, model = mod.lcar2.rw1, n.burnin = 1000, n.iter = 5000 , bugs.directory = directorio.winbugs)
+
+save(resul.lcar2.rw1, file =  file.path(directorio_actual, "datos", "resultados", "mentales_orgánicos", "resul.lcar2.rw1.Rdata"))
+```
+
+
+### 14_alzheimer
+```{r}
+#datos
+datos.2 <- list(Obs=Obs$"14_alzheimer", Exp=Exp$"14_alzheimer",
+              n=length(Obs$"14_alzheimer"), adj.1=adj.1, num.1=num.1, 
+              index.1=index.1, n.adj.1=length(adj.1), adj.2=adj.2, num.2=num.2, 
+              index.2=index.2, n.adj.2=length(adj.2), cero=0)
+
+# Llámamos a WB
+set.seed(2)
+resul.lcar2.rw1<- bugs(data = datos.2, inits = inits.2, parameters = param.2, model = mod.lcar2.rw1, n.burnin = 1000, n.iter = 5000 , bugs.directory = directorio.winbugs)
+
+save(resul.lcar2.rw1, file =  file.path(directorio_actual, "datos", "resultados", "alzheimer", "resul.lcar2.rw1.Rdata"))
+```
+
+
+### 15_demencia
+```{r}
+#datos
+datos.2 <- list(Obs=Obs$"15_demencia", Exp=Exp$"15_demencia",
+              n=length(Obs$"15_demencia"), adj.1=adj.1, num.1=num.1, 
+              index.1=index.1, n.adj.1=length(adj.1), adj.2=adj.2, num.2=num.2, 
+              index.2=index.2, n.adj.2=length(adj.2), cero=0)
+
+# Llámamos a WB
+set.seed(2)
+resul.lcar2.rw1<- bugs(data = datos.2, inits = inits.2, parameters = param.2, model = mod.lcar2.rw1, n.burnin = 1000, n.iter = 5000 , bugs.directory = directorio.winbugs)
+
+save(resul.lcar2.rw1, file =  file.path(directorio_actual, "datos", "resultados", "demencia", "resul.lcar2.rw1.Rdata"))
+```
+
+
+### 16_isquemica_corazon
+```{r}
+#datos
+datos.2 <- list(Obs=Obs$"16_isquemica_corazon", Exp=Exp$"16_isquemica_corazon",
+              n=length(Obs$"16_isquemica_corazon"), adj.1=adj.1, num.1=num.1, 
+              index.1=index.1, n.adj.1=length(adj.1), adj.2=adj.2, num.2=num.2, 
+              index.2=index.2, n.adj.2=length(adj.2), cero=0)
+
+# Llámamos a WB
+set.seed(2)
+resul.lcar2.rw1<- bugs(data = datos.2, inits = inits.2, parameters = param.2, model = mod.lcar2.rw1, n.burnin = 1000, n.iter = 5000 , bugs.directory = directorio.winbugs)
+
+save(resul.lcar2.rw1, file =  file.path(directorio_actual, "datos", "resultados", "isquemica", "resul.lcar2.rw1.Rdata"))
+```
+
+
+### 17_ictus
+```{r}
+#datos
+datos.2 <- list(Obs=Obs$"17_ictus", Exp=Exp$"17_ictus",
+              n=length(Obs$"17_ictus"), adj.1=adj.1, num.1=num.1, 
+              index.1=index.1, n.adj.1=length(adj.1), adj.2=adj.2, num.2=num.2, 
+              index.2=index.2, n.adj.2=length(adj.2), cero=0)
+
+# Llámamos a WB
+set.seed(2)
+resul.lcar2.rw1<- bugs(data = datos.2, inits = inits.2, parameters = param.2, model = mod.lcar2.rw1, n.burnin = 1000, n.iter = 5000 , bugs.directory = directorio.winbugs)
+
+save(resul.lcar2.rw1, file =  file.path(directorio_actual, "datos", "resultados", "ictus", "resul.lcar2.rw1.Rdata"))
+```
+
+### 18_epoc
+```{r}
+#datos
+datos.2 <- list(Obs=Obs$"18_epoc", Exp=Exp$"18_epoc",
+              n=length(Obs$"18_epoc"), adj.1=adj.1, num.1=num.1, 
+              index.1=index.1, n.adj.1=length(adj.1), adj.2=adj.2, num.2=num.2, 
+              index.2=index.2, n.adj.2=length(adj.2), cero=0)
+
+# Llámamos a WB
+set.seed(2)
+resul.lcar2.rw1<- bugs(data = datos.2, inits = inits.2, parameters = param.2, model = mod.lcar2.rw1, n.burnin = 1000, n.iter = 5000 , bugs.directory = directorio.winbugs)
+
+save(resul.lcar2.rw1, file =  file.path(directorio_actual, "datos", "resultados", "epoc", "resul.lcar2.rw1.Rdata"))
+```
+
+### 19_cirrosis
+```{r}
+#datos
+datos.2 <- list(Obs=Obs$"19_cirrosis", Exp=Exp$"19_cirrosis",
+              n=length(Obs$"19_cirrosis"), adj.1=adj.1, num.1=num.1, 
+              index.1=index.1, n.adj.1=length(adj.1), adj.2=adj.2, num.2=num.2, 
+              index.2=index.2, n.adj.2=length(adj.2), cero=0)
+
+# Llámamos a WB
+set.seed(2)
+resul.lcar2.rw1<- bugs(data = datos.2, inits = inits.2, parameters = param.2, model = mod.lcar2.rw1, n.burnin = 1000, n.iter = 5000 , bugs.directory = directorio.winbugs)
+
+save(resul.lcar2.rw1, file =  file.path(directorio_actual, "datos", "resultados", "cirrosis", "resul.lcar2.rw1.Rdata"))
+```
+
+```{r}
+load(file.path(directorio_actual, "datos", "resultados", "cirrosis","resul.lcar2.rw1.Rdata"))
+
+round(resul.lcar2.rw1$summary, 3)
+```
+
+
+### 20_suicidios
+```{r}
+#datos
+datos.2 <- list(Obs=Obs$"20_suicidios", Exp=Exp$"20_suicidios",
+              n=length(Obs$"20_suicidios"), adj.1=adj.1, num.1=num.1, 
+              index.1=index.1, n.adj.1=length(adj.1), adj.2=adj.2, num.2=num.2, 
+              index.2=index.2, n.adj.2=length(adj.2), cero=0)
+
+# Llámamos a WB
+set.seed(2)
+resul.lcar2.rw1<- bugs(data = datos.2, inits = inits.2, parameters = param.2, model = mod.lcar2.rw1, n.burnin = 1000, n.iter = 5000 , bugs.directory = directorio.winbugs)
+
+save(resul.lcar2.rw1, file =  file.path(directorio_actual, "datos", "resultados", "suicidios", "resul.lcar2.rw1.Rdata"))
+```
+
+### 21_accidente_trafico
+```{r}
+#datos
+datos.2 <- list(Obs=Obs$"21_accidente_trafico", Exp=Exp$"21_accidente_trafico",
+              n=length(Obs$"21_accidente_trafico"), adj.1=adj.1, num.1=num.1, 
+              index.1=index.1, n.adj.1=length(adj.1), adj.2=adj.2, num.2=num.2, 
+              index.2=index.2, n.adj.2=length(adj.2), cero=0)
+
+# Llámamos a WB
+set.seed(2)
+resul.lcar2.rw1<- bugs(data = datos.2, inits = inits.2, parameters = param.2, model = mod.lcar2.rw1, n.burnin = 1000, n.iter = 5000 , bugs.directory = directorio.winbugs)
+
+save(resul.lcar2.rw1, file =  file.path(directorio_actual, "datos", "resultados", "accidente_trafico", "resul.lcar2.rw1.Rdata"))
+```
+
+### 22_todas_causas
+```{r}
+#datos
+datos.2 <- list(Obs=Obs$"22_todas_causas", Exp=Exp$"22_todas_causas",
+              n=length(Obs$"22_todas_causas"), adj.1=adj.1, num.1=num.1, 
+              index.1=index.1, n.adj.1=length(adj.1), adj.2=adj.2, num.2=num.2, 
+              index.2=index.2, n.adj.2=length(adj.2), cero=0)
+
+# Llámamos a WB
+set.seed(2)
+resul.lcar2.rw1<- bugs(data = datos.2, inits = inits.2, parameters = param.2, model = mod.lcar2.rw1, n.burnin = 1000, n.iter = 5000 , bugs.directory = directorio.winbugs)
+
+save(resul.lcar2.rw1, file =  file.path(directorio_actual, "datos", "resultados", "todas_causas", "resul.lcar2.rw1.Rdata"))
+```
+
+
+
+
+
+# Modelo LCAR 2 RW2
+
+```{r}
+mod.lcar2.rw2 <- function(){
+  for (i in 1:n){
+    Obs[i] ~ dpois(mu[i])
+    log(mu[i]) <- log(Exp[i]) + m + sd.ler*ler[i] 
+    ler[i] ~ dnorm(mean.ler[i], prec.ler[i])
+    prec.ler[i] <- ((1-lambda.1-lambda.2) + lambda.1*num.1[i] + lambda.2*prec.2[i])
+    
+    mean.ler[i] <- (((sum(ler.adj.1[(index.1[i]+1):index.1[i+1]])*lambda.1) +(inprod2(ler.adj.2[(index.2[i]+1):index.2[i+1]],w.rw2[(index.2[i]+1):index.2[i+1]])*lambda.2))/((1-lambda.1-lambda.2) + lambda.1*num.1[i] +lambda.2*prec.2[i]))
+    
+    R[i]<-exp(m+sd.ler*ler[i])
+  }
+  
+  for(j in 1:n.adj.1){
+    ler.adj.1[j]<-ler[adj.1[j]]
+  }
+  
+  for(j in 1:n.adj.2){
+    ler.adj.2[j]<-ler[adj.2[j]]
+  }
+  
+  # Restricción suma cero
+  mean.ler.all <- mean(ler[])
+  cero ~ dnorm(mean.ler.all, 10000)
+  
+  # Previas
+  m ~ dflat()
+  sd.ler ~ dunif(0,10)
+  lambda.1 <- q1
+  lambda.2 <- (1-q1)*q2
+  q1 ~ dbeta(1,2)
+  q2 ~ dbeta(1,1)
+}
+
+#iniciales
+inits.2 <- function() {
+  list(m=rnorm(1,0,1), ler=rnorm(531,0,1), sd.ler=runif(1),
+       q1=runif(1), q2=runif(1))
+}
+
+
+#parámetros
+param.2 <- c("m", "sd.ler","lambda.1", "lambda.2", "q1", "q2","R")
+```
+
+## Causas mortalidad: código ejecutable
+### 01_sida
+```{r}
+#datos
+datos.2 <- list(Obs=Obs$"01_sida", Exp=Exp$"01_sida",
+              n=length(Obs$"01_sida"), adj.1=adj.1, num.1=num.1, 
+              index.1=index.1, n.adj.1=length(adj.1), adj.2=adj.rw2,
+              prec.2=prec.rw2, index.2=index.rw2, n.adj.2=length(adj.rw2),
+              w.rw2=w.rw2, cero=0)
+
+# Llámamos a WB
+set.seed(2)
+resul.lcar2.rw2<- bugs(data = datos.2, inits = inits.2, parameters = param.2, model = mod.lcar2.rw2, n.burnin = 1000, n.iter = 5000 , bugs.directory = directorio.winbugs)
+
+save(resul.lcar2.rw2, file =  file.path(directorio_actual, "datos", "resultados", "sida", "resul.lcar2.rw2.Rdata"))
+```
+
+
+### 02_cancer_estomago
+```{r}
+#datos
+datos.2 <- list(Obs=Obs$"02_cancer_estomago", Exp=Exp$"02_cancer_estomago",
+              n=length(Obs$"02_cancer_estomago"), adj.1=adj.1, num.1=num.1, 
+              index.1=index.1, n.adj.1=length(adj.1), adj.2=adj.rw2, prec.2=prec.rw2, 
+              index.2=index.rw2, n.adj.2=length(adj.rw2), w.rw2=w.rw2, cero=0)
+
+# Llámamos a WB
+set.seed(2)
+resul.lcar2.rw2<- bugs(data = datos.2, inits = inits.2, parameters = param.2, model = mod.lcar2.rw2, n.burnin = 1000, n.iter = 5000 , bugs.directory = directorio.winbugs)
+
+save(resul.lcar2.rw2, file =  file.path(directorio_actual, "datos", "resultados", "cancer_estomago", "resul.lcar2.rw2.Rdata"))
+```
+
+### 03_cancer_colon
+```{r}
+#datos
+datos.2 <- list(Obs=Obs$"03_cancer_colon", Exp=Exp$"03_cancer_colon",
+              n=length(Obs$"03_cancer_colon"), adj.1=adj.1, num.1=num.1, 
+              index.1=index.1, n.adj.1=length(adj.1), adj.2=adj.rw2, prec.2=prec.rw2, 
+              index.2=index.rw2, n.adj.2=length(adj.rw2), w.rw2=w.rw2, cero=0)
+
+# Llámamos a WB
+set.seed(2)
+resul.lcar2.rw2<- bugs(data = datos.2, inits = inits.2, parameters = param.2, model = mod.lcar2.rw2, n.burnin = 1000, n.iter = 5000 , bugs.directory = directorio.winbugs)
+
+save(resul.lcar2.rw2, file =  file.path(directorio_actual, "datos", "resultados", "cancer_colon", "resul.lcar2.rw2.Rdata"))
+```
+
+
+### 04_cancer_recto
+```{r}
+#datos
+datos.2 <- list(Obs=Obs$"04_cancer_recto", Exp=Exp$"04_cancer_recto",
+              n=length(Obs$"04_cancer_recto"), adj.1=adj.1, num.1=num.1, 
+              index.1=index.1, n.adj.1=length(adj.1), adj.2=adj.rw2, prec.2=prec.rw2, 
+              index.2=index.rw2, n.adj.2=length(adj.rw2), w.rw2=w.rw2, cero=0)
+
+# Llámamos a WB
+set.seed(2)
+resul.lcar2.rw2<- bugs(data = datos.2, inits = inits.2, parameters = param.2, model = mod.lcar2.rw2, n.burnin = 1000, n.iter = 5000 , bugs.directory = directorio.winbugs)
+
+save(resul.lcar2.rw2, file =  file.path(directorio_actual, "datos", "resultados", "cancer_recto", "resul.lcar2.rw2.Rdata"))
+```
+
+### 05_cancer_colorectal
+```{r}
+#datos
+datos.2 <- list(Obs=Obs$"05_cancer_colorectal", Exp=Exp$"05_cancer_colorectal",
+              n=length(Obs$"05_cancer_colorectal"), adj.1=adj.1, num.1=num.1, 
+              index.1=index.1, n.adj.1=length(adj.1), adj.2=adj.rw2, prec.2=prec.rw2, 
+              index.2=index.rw2, n.adj.2=length(adj.rw2), w.rw2=w.rw2, cero=0)
+
+# Llámamos a WB
+set.seed(2)
+resul.lcar2.rw2<- bugs(data = datos.2, inits = inits.2, parameters = param.2, model = mod.lcar2.rw2, n.burnin = 1000, n.iter = 5000 , bugs.directory = directorio.winbugs)
+
+save(resul.lcar2.rw2, file =  file.path(directorio_actual, "datos", "resultados", "cancer_colorectal", "resul.lcar2.rw2.Rdata"))
+```
+
+### 06_cancer_laringe
+```{r}
+#datos
+datos.2 <- list(Obs=Obs$"06_cancer_laringe", Exp=Exp$"06_cancer_laringe",
+              n=length(Obs$"06_cancer_laringe"), adj.1=adj.1, num.1=num.1, 
+              index.1=index.1, n.adj.1=length(adj.1), adj.2=adj.rw2, prec.2=prec.rw2, 
+              index.2=index.rw2, n.adj.2=length(adj.rw2), w.rw2=w.rw2, cero=0)
+
+# Llámamos a WB
+set.seed(2)
+resul.lcar2.rw2<- bugs(data = datos.2, inits = inits.2, parameters = param.2, model = mod.lcar2.rw2, n.burnin = 1000, n.iter = 5000 , bugs.directory = directorio.winbugs)
+
+save(resul.lcar2.rw2, file =  file.path(directorio_actual, "datos", "resultados", "cancer_laringe", "resul.lcar2.rw2.Rdata"))
+```
+
+### 07_cancer_pulmon
+```{r}
+#datos
+datos.2 <- list(Obs=Obs$"07_cancer_pulmon", Exp=Exp$"07_cancer_pulmon",
+              n=length(Obs$"07_cancer_pulmon"), adj.1=adj.1, num.1=num.1, 
+              index.1=index.1, n.adj.1=length(adj.1), adj.2=adj.rw2, prec.2=prec.rw2, 
+              index.2=index.rw2, n.adj.2=length(adj.rw2), w.rw2=w.rw2, cero=0)
+
+# Llámamos a WB
+set.seed(2)
+resul.lcar2.rw2<- bugs(data = datos.2, inits = inits.2, parameters = param.2, model = mod.lcar2.rw2, n.burnin = 1000, n.iter = 5000 , bugs.directory = directorio.winbugs)
+
+save(resul.lcar2.rw2, file =  file.path(directorio_actual, "datos", "resultados", "cancer_pulmon", "resul.lcar2.rw2.Rdata"))
+```
+
+### 08_cancer_mama
+```{r}
+#datos
+datos.2 <- list(Obs=Obs$"08_cancer_mama", Exp=Exp$"08_cancer_mama",
+              n=length(Obs$"08_cancer_mama"), adj.1=adj.1, num.1=num.1, 
+              index.1=index.1, n.adj.1=length(adj.1), adj.2=adj.rw2, prec.2=prec.rw2, 
+              index.2=index.rw2, n.adj.2=length(adj.rw2), w.rw2=w.rw2, cero=0)
+
+# Llámamos a WB
+set.seed(2)
+resul.lcar2.rw2<- bugs(data = datos.2, inits = inits.2, parameters = param.2, model = mod.lcar2.rw2, n.burnin = 1000, n.iter = 5000 , bugs.directory = directorio.winbugs)
+
+save(resul.lcar2.rw2, file =  file.path(directorio_actual, "datos", "resultados", "cancer_mama", "resul.lcar2.rw2.Rdata"))
+```
+
+### 09_cancer_prostata
+```{r}
+#datos
+datos.2 <- list(Obs=Obs$"09_cancer_prostata", Exp=Exp$"09_cancer_prostata",
+              n=length(Obs$"09_cancer_prostata"), adj.1=adj.1, num.1=num.1, 
+              index.1=index.1, n.adj.1=length(adj.1), adj.2=adj.rw2, prec.2=prec.rw2, 
+              index.2=index.rw2, n.adj.2=length(adj.rw2), w.rw2=w.rw2, cero=0)
+
+# Llámamos a WB
+set.seed(2)
+resul.lcar2.rw2<- bugs(data = datos.2, inits = inits.2, parameters = param.2, model = mod.lcar2.rw2, n.burnin = 1000, n.iter = 5000 , bugs.directory = directorio.winbugs)
+
+save(resul.lcar2.rw2, file =  file.path(directorio_actual, "datos", "resultados", "cancer_prostata", "resul.lcar2.rw2.Rdata"))
+```
+
+### 10_cancer_vejiga
+```{r}
+#datos
+datos.2 <- list(Obs=Obs$"10_cancer_vejiga", Exp=Exp$"10_cancer_vejiga",
+              n=length(Obs$"10_cancer_vejiga"), adj.1=adj.1, num.1=num.1, 
+              index.1=index.1, n.adj.1=length(adj.1), adj.2=adj.rw2, prec.2=prec.rw2, 
+              index.2=index.rw2, n.adj.2=length(adj.rw2), w.rw2=w.rw2, cero=0)
+
+# Llámamos a WB
+set.seed(2)
+resul.lcar2.rw2<- bugs(data = datos.2, inits = inits.2, parameters = param.2, model = mod.lcar2.rw2, n.burnin = 1000, n.iter = 5000 , bugs.directory = directorio.winbugs)
+
+save(resul.lcar2.rw2, file =  file.path(directorio_actual, "datos", "resultados", "cancer_vejiga", "resul.lcar2.rw2.Rdata"))
+```
+
+### 11_cancer_hemato
+```{r}
+#datos
+datos.2 <- list(Obs=Obs$"11_cancer_hemato", Exp=Exp$"11_cancer_hemato",
+              n=length(Obs$"11_cancer_hemato"), adj.1=adj.1, num.1=num.1, 
+              index.1=index.1, n.adj.1=length(adj.1), adj.2=adj.rw2, prec.2=prec.rw2, 
+              index.2=index.rw2, n.adj.2=length(adj.rw2), w.rw2=w.rw2, cero=0)
+
+# Llámamos a WB
+set.seed(2)
+resul.lcar2.rw2<- bugs(data = datos.2, inits = inits.2, parameters = param.2, model = mod.lcar2.rw2, n.burnin = 1000, n.iter = 5000 , bugs.directory = directorio.winbugs)
+
+save(resul.lcar2.rw2, file =  file.path(directorio_actual, "datos", "resultados", "cancer_hemato", "resul.lcar2.rw2.Rdata"))
+```
+
+### 12_diabetes
+```{r}
+#datos
+datos.2 <- list(Obs=Obs$"12_diabetes", Exp=Exp$"12_diabetes",
+              n=length(Obs$"12_diabetes"), adj.1=adj.1, num.1=num.1, 
+              index.1=index.1, n.adj.1=length(adj.1), adj.2=adj.rw2, prec.2=prec.rw2, 
+              index.2=index.rw2, n.adj.2=length(adj.rw2), w.rw2=w.rw2, cero=0)
+
+# Llámamos a WB
+set.seed(2)
+resul.lcar2.rw2<- bugs(data = datos.2, inits = inits.2, parameters = param.2, model = mod.lcar2.rw2, n.burnin = 1000, n.iter = 5000 , bugs.directory = directorio.winbugs)
+
+save(resul.lcar2.rw2, file =  file.path(directorio_actual, "datos", "resultados", "diabetes", "resul.lcar2.rw2.Rdata"))
+```
+
+### 13_ttos_mentales_organicos
+```{r}
+#datos
+datos.2 <- list(Obs=Obs$"13_ttos_mentales_organicos", Exp=Exp$"13_ttos_mentales_organicos",
+              n=length(Obs$"13_ttos_mentales_organicos"), adj.1=adj.1, num.1=num.1, 
+              index.1=index.1, n.adj.1=length(adj.1), adj.2=adj.rw2, prec.2=prec.rw2, 
+              index.2=index.rw2, n.adj.2=length(adj.rw2), w.rw2=w.rw2, cero=0)
+
+# Llámamos a WB
+set.seed(2)
+resul.lcar2.rw2<- bugs(data = datos.2, inits = inits.2, parameters = param.2, model = mod.lcar2.rw2, n.burnin = 1000, n.iter = 5000 , bugs.directory = directorio.winbugs)
+
+save(resul.lcar2.rw2, file =  file.path(directorio_actual, "datos", "resultados", "mentales_orgánicos", "resul.lcar2.rw2.Rdata"))
+```
+
+### 14_alzheimer
+```{r}
+#datos
+datos.2 <- list(Obs=Obs$"14_alzheimer", Exp=Exp$"14_alzheimer",
+              n=length(Obs$"14_alzheimer"), adj.1=adj.1, num.1=num.1, 
+              index.1=index.1, n.adj.1=length(adj.1), adj.2=adj.rw2, prec.2=prec.rw2, 
+              index.2=index.rw2, n.adj.2=length(adj.rw2), w.rw2=w.rw2, cero=0)
+
+# Llámamos a WB
+set.seed(2)
+resul.lcar2.rw2<- bugs(data = datos.2, inits = inits.2, parameters = param.2, model = mod.lcar2.rw2, n.burnin = 1000, n.iter = 5000 , bugs.directory = directorio.winbugs)
+
+save(resul.lcar2.rw2, file =  file.path(directorio_actual, "datos", "resultados", "alzheimer", "resul.lcar2.rw2.Rdata"))
+```
+
+### 15_demencia
+```{r}
+#datos
+datos.2 <- list(Obs=Obs$"15_demencia", Exp=Exp$"15_demencia",
+              n=length(Obs$"15_demencia"), adj.1=adj.1, num.1=num.1, 
+              index.1=index.1, n.adj.1=length(adj.1), adj.2=adj.rw2, prec.2=prec.rw2, 
+              index.2=index.rw2, n.adj.2=length(adj.rw2), w.rw2=w.rw2, cero=0)
+
+# Llámamos a WB
+set.seed(2)
+resul.lcar2.rw2<- bugs(data = datos.2, inits = inits.2, parameters = param.2, model = mod.lcar2.rw2, n.burnin = 1000, n.iter = 5000 , bugs.directory = directorio.winbugs)
+
+save(resul.lcar2.rw2, file =  file.path(directorio_actual, "datos", "resultados", "demencia", "resul.lcar2.rw2.Rdata"))
+```
+
+### 16_isquemica_corazon
+```{r}
+#datos
+datos.2 <- list(Obs=Obs$"16_isquemica_corazon", Exp=Exp$"16_isquemica_corazon",
+              n=length(Obs$"16_isquemica_corazon"), adj.1=adj.1, num.1=num.1, 
+              index.1=index.1, n.adj.1=length(adj.1), adj.2=adj.rw2, prec.2=prec.rw2, 
+              index.2=index.rw2, n.adj.2=length(adj.rw2), w.rw2=w.rw2, cero=0)
+
+# Llámamos a WB
+set.seed(2)
+resul.lcar2.rw2<- bugs(data = datos.2, inits = inits.2, parameters = param.2, model = mod.lcar2.rw2, n.burnin = 1000, n.iter = 5000 , bugs.directory = directorio.winbugs)
+
+save(resul.lcar2.rw2, file =  file.path(directorio_actual, "datos", "resultados", "isquemica", "resul.lcar2.rw2.Rdata"))
+```
+
+### 17_ictus
+```{r}
+#datos
+datos.2 <- list(Obs=Obs$"17_ictus", Exp=Exp$"17_ictus",
+              n=length(Obs$"17_ictus"), adj.1=adj.1, num.1=num.1, 
+              index.1=index.1, n.adj.1=length(adj.1), adj.2=adj.rw2, prec.2=prec.rw2, 
+              index.2=index.rw2, n.adj.2=length(adj.rw2), w.rw2=w.rw2, cero=0)
+
+# Llámamos a WB
+set.seed(2)
+resul.lcar2.rw2<- bugs(data = datos.2, inits = inits.2, parameters = param.2, model = mod.lcar2.rw2, n.burnin = 1000, n.iter = 5000 , bugs.directory = directorio.winbugs)
+
+save(resul.lcar2.rw2, file =  file.path(directorio_actual, "datos", "resultados", "ictus", "resul.lcar2.rw2.Rdata"))
+```
+
+### 18_epoc
+```{r}
+#datos
+datos.2 <- list(Obs=Obs$"18_epoc", Exp=Exp$"18_epoc",
+              n=length(Obs$"18_epoc"), adj.1=adj.1, num.1=num.1, 
+              index.1=index.1, n.adj.1=length(adj.1), adj.2=adj.rw2, prec.2=prec.rw2, 
+              index.2=index.rw2, n.adj.2=length(adj.rw2), w.rw2=w.rw2, cero=0)
+
+# Llámamos a WB
+set.seed(2)
+resul.lcar2.rw2<- bugs(data = datos.2, inits = inits.2, parameters = param.2, model = mod.lcar2.rw2, n.burnin = 1000, n.iter = 5000 , bugs.directory = directorio.winbugs)
+
+save(resul.lcar2.rw2, file =  file.path(directorio_actual, "datos", "resultados", "epoc", "resul.lcar2.rw2.Rdata"))
+```
+
+### 19_cirrosis
+```{r}
+#datos
+datos.2 <- list(Obs=Obs$"19_cirrosis", Exp=Exp$"19_cirrosis",
+              n=length(Obs$"19_cirrosis"), adj.1=adj.1, num.1=num.1, 
+              index.1=index.1, n.adj.1=length(adj.1), adj.2=adj.rw2, prec.2=prec.rw2, 
+              index.2=index.rw2, n.adj.2=length(adj.rw2), w.rw2=w.rw2, cero=0)
+
+# Llámamos a WB
+set.seed(2)
+resul.lcar2.rw2<- bugs(data = datos.2, inits = inits.2, parameters = param.2, model = mod.lcar2.rw2, n.burnin = 1000, n.iter = 5000 , bugs.directory = directorio.winbugs)
+
+save(resul.lcar2.rw2, file =  file.path(directorio_actual, "datos", "resultados", "cirrosis", "resul.lcar2.rw2.Rdata"))
+```
+
+### 20_suicidios
+```{r}
+#datos
+datos.2 <- list(Obs=Obs$"20_suicidios", Exp=Exp$"20_suicidios",
+              n=length(Obs$"20_suicidios"), adj.1=adj.1, num.1=num.1, 
+              index.1=index.1, n.adj.1=length(adj.1), adj.2=adj.rw2, prec.2=prec.rw2, 
+              index.2=index.rw2, n.adj.2=length(adj.rw2), w.rw2=w.rw2, cero=0)
+
+# Llámamos a WB
+set.seed(2)
+resul.lcar2.rw2<- bugs(data = datos.2, inits = inits.2, parameters = param.2, model = mod.lcar2.rw2, n.burnin = 1000, n.iter = 5000 , bugs.directory = directorio.winbugs)
+
+save(resul.lcar2.rw2, file =  file.path(directorio_actual, "datos", "resultados", "suicidios", "resul.lcar2.rw2.Rdata"))
+```
+
+### 21_accidente_trafico
+```{r}
+#datos
+datos.2 <- list(Obs=Obs$"21_accidente_trafico", Exp=Exp$"21_accidente_trafico",
+              n=length(Obs$"21_accidente_trafico"), adj.1=adj.1, num.1=num.1, 
+              index.1=index.1, n.adj.1=length(adj.1), adj.2=adj.rw2, prec.2=prec.rw2, 
+              index.2=index.rw2, n.adj.2=length(adj.rw2), w.rw2=w.rw2, cero=0)
+
+# Llámamos a WB
+set.seed(2)
+resul.lcar2.rw2<- bugs(data = datos.2, inits = inits.2, parameters = param.2, model = mod.lcar2.rw2, n.burnin = 1000, n.iter = 5000 , bugs.directory = directorio.winbugs)
+
+save(resul.lcar2.rw2, file =  file.path(directorio_actual, "datos", "resultados", "accidente_trafico", "resul.lcar2.rw2.Rdata"))
+```
+
+### 22_todas_causas
+```{r}
+#datos
+datos.2 <- list(Obs=Obs$"22_todas_causas", Exp=Exp$"22_todas_causas",
+              n=length(Obs$"22_todas_causas"), adj.1=adj.1, num.1=num.1, 
+              index.1=index.1, n.adj.1=length(adj.1), adj.2=adj.rw2, prec.2=prec.rw2, 
+              index.2=index.rw2, n.adj.2=length(adj.rw2), w.rw2=w.rw2, cero=0)
+
+# Llámamos a WB
+set.seed(2)
+resul.lcar2.rw2<- bugs(data = datos.2, inits = inits.2, parameters = param.2, model = mod.lcar2.rw2, n.burnin = 1000, n.iter = 5000 , bugs.directory = directorio.winbugs)
+
+save(resul.lcar2.rw2, file =  file.path(directorio_actual, "datos", "resultados", "todas_causas", "resul.lcar2.rw2.Rdata"))
+```
+
+
+
+# Modelo LCAR + variable privación (ef.aleatorio)
+
+```{r}
+mod.lcar.priv <- function(){
+  for (i in 1:n){
+    Obs[i] ~ dpois(mu[i])
+    log(mu[i]) <- log(Exp[i]) + m + sd.ler*ler[i] + sd.beta*beta[i]
+    
+    ler[i] ~ dnorm(mean.ler[i], prec.ler[i])
+    prec.ler[i]<-((1-lambda.1) + lambda.1*num.1[i])
+    mean.ler[i]<-(sum(ler.adj.1[(index.1[i]+1):index.1[i+1]])*
+                    lambda.1) /((1-lambda.1) + lambda.1*num.1[i])
+    
+    beta[i] ~ dnorm(mean.beta[i], prec.beta[i])
+    mean.beta[i] <- (sum(beta.adj[(index.1[i]+1):index.1[i+1]])) / num.1[i] 
+    prec.beta[i] <- num.1[i] #para RW1 la precisión coincide con el número de vecinos para cada elemento i. prec.1=num.1
+      
+    R[i]<-exp(m + sd.ler*ler[i] + sd.beta*beta[i])
+    
+  }
+  
+  for(j in 1:n.adj.1){
+    ler.adj.1[j] <- ler[adj.1[j]]
+  }
+  
+  for(j in 1:n.adj.1){
+    beta.adj[j] <- beta[adj.1[j]]
+  }
+  
+  # Restricción suma cero
+  mean.ler.all <- mean(ler[])
+  cero.ler ~ dnorm(mean.ler.all, 10000)
+  
+  mean.beta.all <- mean(beta[])
+  cero.beta ~ dnorm(mean.beta.all, 10000)  
+  
+  # Previas
+  m ~ dflat()
+  sd.ler ~ dunif(0,10)
+  sd.beta ~ dunif(0,10)
+  lambda.1 ~ dunif(0,1)
+}
+
+
+#iniciales
+inits <- function() {
+  list(m=rnorm(1,0,1), ler=rnorm(531,0,1), sd.ler=runif(1), lambda.1=runif(1),
+       beta=rnorm(531,0,1), sd.beta=runif(1))
+}
+
+#parámetros
+param <- c("m",  "ler", "sd.ler","lambda.1", "beta", "sd.beta", "R")
+```
+
+
+## Causas mortalidad: código ejecutable
+### 01_sida
+```{r}
+#datos
+datos <- list(Obs=Obs$"01_sida", Exp=Exp$"01_sida",
+              n=length(Obs$"01_sida"), adj.1=adj.1, num.1=num.1, 
+              index.1=index.1, n.adj.1=length(adj.1), cero.ler=0, cero.beta=0)
+
+# Llámamos a WB
+set.seed(2)
+resul.lcar1.priv<- bugs(data = datos, inits = inits, parameters = param, model = mod.lcar.priv, n.burnin = 1000, n.iter = 5000, bugs.directory = directorio.winbugs)
+
+save(resul.lcar1.priv, file =  file.path(directorio_actual, "datos", "resultados", "sida", "resul.lcar1.priv.Rdata"))
+```
+
+### 02_cancer_estomago
+```{r}
+#datos
+datos <- list(Obs=Obs$"02_cancer_estomago", Exp=Exp$"02_cancer_estomago",
+              n=length(Obs$"02_cancer_estomago"), adj.1=adj.1, num.1=num.1, 
+              index.1=index.1, n.adj.1=length(adj.1), cero.ler=0, cero.beta=0)
+
+# Llámamos a WB
+set.seed(2)
+resul.lcar1.priv<- bugs(data = datos, inits = inits, parameters = param, model = mod.lcar.priv, n.burnin = 1000, n.iter = 5000, bugs.directory = directorio.winbugs)
+
+save(resul.lcar1.priv, file =  file.path(directorio_actual, "datos", "resultados", "cancer_estomago", "resul.lcar1.priv.Rdata"))
+```
+### 03_cancer_colon
+```{r}
+#datos
+datos <- list(Obs=Obs$"03_cancer_colon", Exp=Exp$"03_cancer_colon",
+              n=length(Obs$"03_cancer_colon"), adj.1=adj.1, num.1=num.1, 
+              index.1=index.1, n.adj.1=length(adj.1), cero.ler=0, cero.beta=0)
+
+# Llámamos a WB
+set.seed(2)
+resul.lcar1.priv<- bugs(data = datos, inits = inits, parameters = param, model = mod.lcar.priv, n.burnin = 1000, n.iter = 5000, bugs.directory = directorio.winbugs)
+
+save(resul.lcar1.priv, file =  file.path(directorio_actual, "datos", "resultados", "cancer_colon", "resul.lcar1.priv.Rdata"))
+```
+### 04_cancer_recto
+```{r}
+#datos
+datos <- list(Obs=Obs$"04_cancer_recto", Exp=Exp$"04_cancer_recto",
+              n=length(Obs$"04_cancer_recto"), adj.1=adj.1, num.1=num.1, 
+              index.1=index.1, n.adj.1=length(adj.1), cero.ler=0, cero.beta=0)
+
+# Llámamos a WB
+set.seed(2)
+resul.lcar1.priv<- bugs(data = datos, inits = inits, parameters = param, model = mod.lcar.priv, n.burnin = 1000, n.iter = 5000, bugs.directory = directorio.winbugs)
+
+save(resul.lcar1.priv, file =  file.path(directorio_actual, "datos", "resultados", "cancer_recto", "resul.lcar1.priv.Rdata"))
+```
+### 05_cancer_colorectal
+```{r}
+#datos
+datos <- list(Obs=Obs$"05_cancer_colorectal", Exp=Exp$"05_cancer_colorectal",
+              n=length(Obs$"05_cancer_colorectal"), adj.1=adj.1, num.1=num.1, 
+              index.1=index.1, n.adj.1=length(adj.1), cero.ler=0, cero.beta=0)
+
+# Llámamos a WB
+set.seed(2)
+resul.lcar1.priv<- bugs(data = datos, inits = inits, parameters = param, model = mod.lcar.priv, n.burnin = 1000, n.iter = 5000, bugs.directory = directorio.winbugs)
+
+save(resul.lcar1.priv, file =  file.path(directorio_actual, "datos", "resultados", "cancer_colorectal", "resul.lcar1.priv.Rdata"))
+```
+### 06_cancer_laringe
+```{r}
+#datos
+datos <- list(Obs=Obs$"06_cancer_laringe", Exp=Exp$"06_cancer_laringe",
+              n=length(Obs$"06_cancer_laringe"), adj.1=adj.1, num.1=num.1, 
+              index.1=index.1, n.adj.1=length(adj.1), cero.ler=0, cero.beta=0)
+
+# Llámamos a WB
+set.seed(2)
+resul.lcar1.priv<- bugs(data = datos, inits = inits, parameters = param, model = mod.lcar.priv, n.burnin = 1000, n.iter = 5000, bugs.directory = directorio.winbugs)
+
+save(resul.lcar1.priv, file =  file.path(directorio_actual, "datos", "resultados", "cancer_laringe", "resul.lcar1.priv.Rdata"))
+```
+### 07_cancer_pulmon
+```{r}
+#datos
+datos <- list(Obs=Obs$"07_cancer_pulmon", Exp=Exp$"07_cancer_pulmon",
+              n=length(Obs$"07_cancer_pulmon"), adj.1=adj.1, num.1=num.1, 
+              index.1=index.1, n.adj.1=length(adj.1), cero.ler=0, cero.beta=0)
+
+# Llámamos a WB
+set.seed(2)
+resul.lcar1.priv<- bugs(data = datos, inits = inits, parameters = param, model = mod.lcar.priv, n.burnin = 1000, n.iter = 5000, bugs.directory = directorio.winbugs)
+
+save(resul.lcar1.priv, file =  file.path(directorio_actual, "datos", "resultados", "cancer_pulmon", "resul.lcar1.priv.Rdata"))
+```
+### 08_cancer_mama
+```{r}
+#datos
+datos <- list(Obs=Obs$"08_cancer_mama", Exp=Exp$"08_cancer_mama",
+              n=length(Obs$"08_cancer_mama"), adj.1=adj.1, num.1=num.1, 
+              index.1=index.1, n.adj.1=length(adj.1), cero.ler=0, cero.beta=0)
+
+# Llámamos a WB
+set.seed(2)
+resul.lcar1.priv<- bugs(data = datos, inits = inits, parameters = param, model = mod.lcar.priv, n.burnin = 1000, n.iter = 5000, bugs.directory = directorio.winbugs)
+
+save(resul.lcar1.priv, file =  file.path(directorio_actual, "datos", "resultados", "cancer_mama", "resul.lcar1.priv.Rdata"))
+```
+### 09_cancer_prostata
+```{r}
+#datos
+datos <- list(Obs=Obs$"09_cancer_prostata", Exp=Exp$"09_cancer_prostata",
+              n=length(Obs$"09_cancer_prostata"), adj.1=adj.1, num.1=num.1, 
+              index.1=index.1, n.adj.1=length(adj.1), cero.ler=0, cero.beta=0)
+
+# Llámamos a WB
+set.seed(2)
+resul.lcar1.priv<- bugs(data = datos, inits = inits, parameters = param, model = mod.lcar.priv, n.burnin = 1000, n.iter = 5000, bugs.directory = directorio.winbugs)
+
+save(resul.lcar1.priv, file =  file.path(directorio_actual, "datos", "resultados", "cancer_prostata", "resul.lcar1.priv.Rdata"))
+```
+
+### 10_cancer_vejiga
+```{r}
+#datos
+datos <- list(Obs=Obs$"10_cancer_vejiga", Exp=Exp$"10_cancer_vejiga",
+              n=length(Obs$"10_cancer_vejiga"), adj.1=adj.1, num.1=num.1, 
+              index.1=index.1, n.adj.1=length(adj.1), cero.ler=0, cero.beta=0)
+
+# Llámamos a WB
+set.seed(2)
+resul.lcar1.priv<- bugs(data = datos, inits = inits, parameters = param, model = mod.lcar.priv, n.burnin = 1000, n.iter = 5000, bugs.directory = directorio.winbugs)
+
+save(resul.lcar1.priv, file =  file.path(directorio_actual, "datos", "resultados", "cancer_vejiga", "resul.lcar1.priv.Rdata"))
+```
+### 11_cancer_hemato
+```{r}
+#datos
+datos <- list(Obs=Obs$"11_cancer_hemato", Exp=Exp$"11_cancer_hemato",
+              n=length(Obs$"11_cancer_hemato"), adj.1=adj.1, num.1=num.1, 
+              index.1=index.1, n.adj.1=length(adj.1), cero.ler=0, cero.beta=0)
+
+# Llámamos a WB
+set.seed(2)
+resul.lcar1.priv<- bugs(data = datos, inits = inits, parameters = param, model = mod.lcar.priv, n.burnin = 1000, n.iter = 5000, bugs.directory = directorio.winbugs)
+
+save(resul.lcar1.priv, file =  file.path(directorio_actual, "datos", "resultados", "cancer_hemato", "resul.lcar1.priv.Rdata"))
+```
+### 12_diabetes
+```{r}
+#datos
+datos <- list(Obs=Obs$"12_diabetes", Exp=Exp$"12_diabetes",
+              n=length(Obs$"12_diabetes"), adj.1=adj.1, num.1=num.1, 
+              index.1=index.1, n.adj.1=length(adj.1), cero.ler=0, cero.beta=0)
+
+# Llámamos a WB
+set.seed(2)
+resul.lcar1.priv<- bugs(data = datos, inits = inits, parameters = param, model = mod.lcar.priv, n.burnin = 1000, n.iter = 5000, bugs.directory = directorio.winbugs)
+
+save(resul.lcar1.priv, file =  file.path(directorio_actual, "datos", "resultados", "diabetes", "resul.lcar1.priv.Rdata"))
+```
+### 13_ttos_mentales_organicos
+```{r}
+#datos
+datos <- list(Obs=Obs$"13_ttos_mentales_organicos", Exp=Exp$"13_ttos_mentales_organicos",
+              n=length(Obs$"13_ttos_mentales_organicos"), adj.1=adj.1, num.1=num.1, 
+              index.1=index.1, n.adj.1=length(adj.1), cero.ler=0, cero.beta=0)
+
+# Llámamos a WB
+set.seed(2)
+resul.lcar1.priv<- bugs(data = datos, inits = inits, parameters = param, model = mod.lcar.priv, n.burnin = 1000, n.iter = 5000, bugs.directory = directorio.winbugs)
+
+save(resul.lcar1.priv, file =  file.path(directorio_actual, "datos", "resultados", "mentales_orgánicos", "resul.lcar1.priv.Rdata"))
+```
+### 14_alzheimer
+```{r}
+#datos
+datos <- list(Obs=Obs$"14_alzheimer", Exp=Exp$"14_alzheimer",
+              n=length(Obs$"14_alzheimer"), adj.1=adj.1, num.1=num.1, 
+              index.1=index.1, n.adj.1=length(adj.1), cero.ler=0, cero.beta=0)
+
+# Llámamos a WB
+set.seed(2)
+resul.lcar1.priv<- bugs(data = datos, inits = inits, parameters = param, model = mod.lcar.priv, n.burnin = 1000, n.iter = 5000, bugs.directory = directorio.winbugs)
+
+save(resul.lcar1.priv, file =  file.path(directorio_actual, "datos", "resultados", "alzheimer", "resul.lcar1.priv.Rdata"))
+```
+### 15_demencia
+```{r}
+#datos
+datos <- list(Obs=Obs$"15_demencia", Exp=Exp$"15_demencia",
+              n=length(Obs$"15_demencia"), adj.1=adj.1, num.1=num.1, 
+              index.1=index.1, n.adj.1=length(adj.1), cero.ler=0, cero.beta=0)
+
+# Llámamos a WB
+set.seed(2)
+resul.lcar1.priv<- bugs(data = datos, inits = inits, parameters = param, model = mod.lcar.priv, n.burnin = 1000, n.iter = 5000, bugs.directory = directorio.winbugs)
+
+save(resul.lcar1.priv, file =  file.path(directorio_actual, "datos", "resultados", "demencia", "resul.lcar1.priv.Rdata"))
+```
+### 16_isquemica_corazon
+```{r}
+#datos
+datos <- list(Obs=Obs$"16_isquemica_corazon", Exp=Exp$"16_isquemica_corazon",
+              n=length(Obs$"16_isquemica_corazon"), adj.1=adj.1, num.1=num.1, 
+              index.1=index.1, n.adj.1=length(adj.1), cero.ler=0, cero.beta=0)
+
+# Llámamos a WB
+set.seed(2)
+resul.lcar1.priv<- bugs(data = datos, inits = inits, parameters = param, model = mod.lcar.priv, n.burnin = 1000, n.iter = 5000, bugs.directory = directorio.winbugs)
+
+save(resul.lcar1.priv, file =  file.path(directorio_actual, "datos", "resultados", "isquemica", "resul.lcar1.priv.Rdata"))
+```
+### 17_ictus
+```{r}
+#datos
+datos <- list(Obs=Obs$"17_ictus", Exp=Exp$"17_ictus",
+              n=length(Obs$"17_ictus"), adj.1=adj.1, num.1=num.1, 
+              index.1=index.1, n.adj.1=length(adj.1), cero.ler=0, cero.beta=0)
+
+# Llámamos a WB
+set.seed(2)
+resul.lcar1.priv<- bugs(data = datos, inits = inits, parameters = param, model = mod.lcar.priv, n.burnin = 1000, n.iter = 5000, bugs.directory = directorio.winbugs)
+
+save(resul.lcar1.priv, file =  file.path(directorio_actual, "datos", "resultados", "ictus", "resul.lcar1.priv.Rdata"))
+```
+### 18_epoc
+```{r}
+#datos
+datos <- list(Obs=Obs$"18_epoc", Exp=Exp$"18_epoc",
+              n=length(Obs$"18_epoc"), adj.1=adj.1, num.1=num.1, 
+              index.1=index.1, n.adj.1=length(adj.1), cero.ler=0, cero.beta=0)
+
+# Llámamos a WB
+set.seed(3)
+resul.lcar1.priv<- bugs(data = datos, inits = inits, parameters = param, model = mod.lcar.priv, n.burnin = 1000, n.iter = 5000, bugs.directory = directorio.winbugs)
+
+save(resul.lcar1.priv, file =  file.path(directorio_actual, "datos", "resultados", "epoc", "resul.lcar1.priv.Rdata"))
+```
+
+### 19_cirrosis
+```{r}
+#datos
+datos <- list(Obs=Obs$"19_cirrosis", Exp=Exp$"19_cirrosis",
+              n=length(Obs$"19_cirrosis"), adj.1=adj.1, num.1=num.1, 
+              index.1=index.1, n.adj.1=length(adj.1), cero.ler=0, cero.beta=0)
+
+# Llámamos a WB
+set.seed(2)
+resul.lcar1.priv<- bugs(data = datos, inits = inits, parameters = param, model = mod.lcar.priv, n.burnin = 1000, n.iter = 10000, bugs.directory = directorio.winbugs) 
+
+save(resul.lcar1.priv, file =  file.path(directorio_actual, "datos", "resultados", "cirrosis", "resul.lcar1.priv.Rdata"))
+```
+
+
+### 20_suicidios
+```{r}
+#datos
+datos <- list(Obs=Obs$"20_suicidios", Exp=Exp$"20_suicidios",
+              n=length(Obs$"20_suicidios"), adj.1=adj.1, num.1=num.1, 
+              index.1=index.1, n.adj.1=length(adj.1), cero.ler=0, cero.beta=0)
+
+# Llámamos a WB
+set.seed(2)
+resul.lcar1.priv<- bugs(data = datos, inits = inits, parameters = param, model = mod.lcar.priv, n.burnin = 1000, n.iter = 5000, bugs.directory = directorio.winbugs)
+
+save(resul.lcar1.priv, file =  file.path(directorio_actual, "datos", "resultados", "suicidios", "resul.lcar1.priv.Rdata"))
+```
+### 21_accidente_trafico
+```{r}
+#datos
+datos <- list(Obs=Obs$"21_accidente_trafico", Exp=Exp$"21_accidente_trafico",
+              n=length(Obs$"21_accidente_trafico"), adj.1=adj.1, num.1=num.1, 
+              index.1=index.1, n.adj.1=length(adj.1), cero.ler=0, cero.beta=0)
+
+# Llámamos a WB
+set.seed(2)
+resul.lcar1.priv<- bugs(data = datos, inits = inits, parameters = param, model = mod.lcar.priv, n.burnin = 1000, n.iter = 5000, bugs.directory = directorio.winbugs)
+
+save(resul.lcar1.priv, file =  file.path(directorio_actual, "datos", "resultados", "accidente_trafico", "resul.lcar1.priv.Rdata"))
+```
+### 22_todas_causas
+```{r}
+#datos
+datos <- list(Obs=Obs$"22_todas_causas", Exp=Exp$"22_todas_causas",
+              n=length(Obs$"22_todas_causas"), adj.1=adj.1, num.1=num.1, 
+              index.1=index.1, n.adj.1=length(adj.1), cero.ler=0, cero.beta=0)
+
+# Llámamos a WB
+set.seed(2)
+resul.lcar1.priv<- bugs(data = datos, inits = inits, parameters = param, model = mod.lcar.priv, n.burnin = 1000, n.iter = 5000, bugs.directory = directorio.winbugs)
+
+save(resul.lcar1.priv, file =  file.path(directorio_actual, "datos", "resultados", "todas_causas", "resul.lcar1.priv.Rdata"))
+```
+
+
+
+
+
+
+
+
