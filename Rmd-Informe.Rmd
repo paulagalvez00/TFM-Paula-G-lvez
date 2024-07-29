@@ -2752,7 +2752,7 @@ media_por_columna_suavizada <- apply(array_rme_suavizada, c(2, 3), mean)
 var_por_columna_suavizada <- apply(array_rme_suavizada, c(2, 3), var)
 
 # Agregar una dimensión al resultado: dimesiones  (1  4 22)
-media_por_columna_suavizada <- array(media_por_columna_suavizada, dim = c(1, dim(media_por_columna)))
+media_por_columna_suavizada <- array(media_por_columna_suavizada, dim = c(1, dim(media_por_columna_suavizada)))
 var_por_columna_suavizada <- array(var_por_columna_suavizada, dim = c(1, dim(var_por_columna_suavizada)))
 
 # Fusionar los dos arrays a lo largo de la primera dimensión
@@ -2940,7 +2940,7 @@ datos.tabla <- data.frame(
                  ic_lcar1,
                  "-", "-",
                  round(resul.lcar1[["DIC"]], 3),
-                 round(cociente_varianzas[1, 2, 1], 3)
+                 round(cociente_varianzas[1, 2, 2], 3)
             ),
   
   LCAR2.RW1 = c(round(resul.lcar2.rw1[["mean"]][["lambda.1"]], 3),
@@ -2948,7 +2948,7 @@ datos.tabla <- data.frame(
                 round(resul.lcar2.rw1[["mean"]][["lambda.2"]], 3),
                 ic_lcar2.rw1_lambda2,
                 round(resul.lcar2.rw1[["DIC"]], 3),
-                round(cociente_varianzas[1, 3, 1], 3)
+                round(cociente_varianzas[1, 3, 2], 3)
                 ),
   
   LCAR2.RW2 = c(round(resul.lcar2.rw2[["mean"]][["lambda.1"]], 3),
@@ -2956,14 +2956,14 @@ datos.tabla <- data.frame(
                 round(resul.lcar2.rw2[["mean"]][["lambda.2"]], 3),
                 ic_lcar2.rw2_lambda1,
                 round(resul.lcar2.rw2[["DIC"]], 3),
-                round(cociente_varianzas[1, 4, 1], 3)
+                round(cociente_varianzas[1, 4, 2], 3)
                 ),
   
   LCAR1.PRIV = c(round(resul.lcar1.priv[["mean"]][["lambda.1"]], 3),
                  ic_lcar1.priv,
                  "-", "-",
                  round(resul.lcar1.priv[["DIC"]], 3),
-                 round(cociente_varianzas[1, 1, 1], 3)
+                 round(cociente_varianzas[1, 1, 2], 3)
                  )
   )
 
@@ -3024,7 +3024,7 @@ datos.tabla <- data.frame(
                  ic_lcar1,
                  "-", "-",
                  round(resul.lcar1[["DIC"]], 3),
-                 round(cociente_varianzas[1, 2, 1], 3)
+                 round(cociente_varianzas[1, 2, 3], 3)
             ),
   
   LCAR2.RW1 = c(round(resul.lcar2.rw1[["mean"]][["lambda.1"]], 3),
@@ -3032,7 +3032,7 @@ datos.tabla <- data.frame(
                 round(resul.lcar2.rw1[["mean"]][["lambda.2"]], 3),
                 ic_lcar2.rw1_lambda2,
                 round(resul.lcar2.rw1[["DIC"]], 3),
-                round(cociente_varianzas[1, 3, 1], 3)
+                round(cociente_varianzas[1, 3, 3], 3)
                 ),
   
   LCAR2.RW2 = c(round(resul.lcar2.rw2[["mean"]][["lambda.1"]], 3),
@@ -3040,14 +3040,14 @@ datos.tabla <- data.frame(
                 round(resul.lcar2.rw2[["mean"]][["lambda.2"]], 3),
                 ic_lcar2.rw2_lambda1,
                 round(resul.lcar2.rw2[["DIC"]], 3),
-                round(cociente_varianzas[1, 4, 1], 3)
+                round(cociente_varianzas[1, 4, 3], 3)
                 ),
   
   LCAR1.PRIV = c(round(resul.lcar1.priv[["mean"]][["lambda.1"]], 3),
                  ic_lcar1.priv,
                  "-", "-",
                  round(resul.lcar1.priv[["DIC"]], 3),
-                 round(cociente_varianzas[1, 1, 1], 3)
+                 round(cociente_varianzas[1, 1, 3], 3)
                  )
   )
 
@@ -3106,7 +3106,7 @@ datos.tabla <- data.frame(
                  ic_lcar1,
                  "-", "-",
                  round(resul.lcar1[["DIC"]], 3),
-                 round(cociente_varianzas[1, 2, 1], 3)
+                 round(cociente_varianzas[1, 2, 4], 3)
             ),
   
   LCAR2.RW1 = c(round(resul.lcar2.rw1[["mean"]][["lambda.1"]], 3),
@@ -3114,7 +3114,7 @@ datos.tabla <- data.frame(
                 round(resul.lcar2.rw1[["mean"]][["lambda.2"]], 3),
                 ic_lcar2.rw1_lambda2,
                 round(resul.lcar2.rw1[["DIC"]], 3),
-                round(cociente_varianzas[1, 3, 1], 3)
+                round(cociente_varianzas[1, 3, 4], 3)
                 ),
   
   LCAR2.RW2 = c(round(resul.lcar2.rw2[["mean"]][["lambda.1"]], 3),
@@ -3122,14 +3122,14 @@ datos.tabla <- data.frame(
                 round(resul.lcar2.rw2[["mean"]][["lambda.2"]], 3),
                 ic_lcar2.rw2_lambda1,
                 round(resul.lcar2.rw2[["DIC"]], 3),
-                round(cociente_varianzas[1, 4, 1], 3)
+                round(cociente_varianzas[1, 4, 4], 3)
                 ),
   
   LCAR1.PRIV = c(round(resul.lcar1.priv[["mean"]][["lambda.1"]], 3),
                  ic_lcar1.priv,
                  "-", "-",
                  round(resul.lcar1.priv[["DIC"]], 3),
-                 round(cociente_varianzas[1, 1, 1], 3)
+                 round(cociente_varianzas[1, 1, 4], 3)
                  )
   )
 
@@ -3186,7 +3186,7 @@ datos.tabla <- data.frame(
                  ic_lcar1,
                  "-", "-",
                  round(resul.lcar1[["DIC"]], 3),
-                 round(cociente_varianzas[1, 2, 1], 3)
+                 round(cociente_varianzas[1, 2, 5], 3)
             ),
   
   LCAR2.RW1 = c(round(resul.lcar2.rw1[["mean"]][["lambda.1"]], 3),
@@ -3194,7 +3194,7 @@ datos.tabla <- data.frame(
                 round(resul.lcar2.rw1[["mean"]][["lambda.2"]], 3),
                 ic_lcar2.rw1_lambda2,
                 round(resul.lcar2.rw1[["DIC"]], 3),
-                round(cociente_varianzas[1, 3, 1], 3)
+                round(cociente_varianzas[1, 3, 5], 3)
                 ),
   
   LCAR2.RW2 = c(round(resul.lcar2.rw2[["mean"]][["lambda.1"]], 3),
@@ -3202,14 +3202,14 @@ datos.tabla <- data.frame(
                 round(resul.lcar2.rw2[["mean"]][["lambda.2"]], 3),
                 ic_lcar2.rw2_lambda1,
                 round(resul.lcar2.rw2[["DIC"]], 3),
-                round(cociente_varianzas[1, 4, 1], 3)
+                round(cociente_varianzas[1, 4, 5], 3)
                 ),
   
   LCAR1.PRIV = c(round(resul.lcar1.priv[["mean"]][["lambda.1"]], 3),
                  ic_lcar1.priv,
                  "-", "-",
                  round(resul.lcar1.priv[["DIC"]], 3),
-                 round(cociente_varianzas[1, 1, 1], 3)
+                 round(cociente_varianzas[1, 1, 5], 3)
                  )
   )
 
@@ -3266,7 +3266,7 @@ datos.tabla <- data.frame(
                  ic_lcar1,
                  "-", "-",
                  round(resul.lcar1[["DIC"]], 3),
-                 round(cociente_varianzas[1, 2, 1], 3)
+                 round(cociente_varianzas[1, 2, 6], 3)
             ),
   
   LCAR2.RW1 = c(round(resul.lcar2.rw1[["mean"]][["lambda.1"]], 3),
@@ -3274,7 +3274,7 @@ datos.tabla <- data.frame(
                 round(resul.lcar2.rw1[["mean"]][["lambda.2"]], 3),
                 ic_lcar2.rw1_lambda2,
                 round(resul.lcar2.rw1[["DIC"]], 3),
-                round(cociente_varianzas[1, 3, 1], 3)
+                round(cociente_varianzas[1, 3, 6], 3)
                 ),
   
   LCAR2.RW2 = c(round(resul.lcar2.rw2[["mean"]][["lambda.1"]], 3),
@@ -3282,14 +3282,14 @@ datos.tabla <- data.frame(
                 round(resul.lcar2.rw2[["mean"]][["lambda.2"]], 3),
                 ic_lcar2.rw2_lambda1,
                 round(resul.lcar2.rw2[["DIC"]], 3),
-                round(cociente_varianzas[1, 4, 1], 3)
+                round(cociente_varianzas[1, 4, 6], 3)
                 ),
   
   LCAR1.PRIV = c(round(resul.lcar1.priv[["mean"]][["lambda.1"]], 3),
                  ic_lcar1.priv,
                  "-", "-",
                  round(resul.lcar1.priv[["DIC"]], 3),
-                 round(cociente_varianzas[1, 1, 1], 3)
+                 round(cociente_varianzas[1, 1, 6], 3)
                  )
   )
 
@@ -3346,7 +3346,7 @@ datos.tabla <- data.frame(
                  ic_lcar1,
                  "-", "-",
                  round(resul.lcar1[["DIC"]], 3),
-                 round(cociente_varianzas[1, 2, 1], 3)
+                 round(cociente_varianzas[1, 2, 7], 3)
             ),
   
   LCAR2.RW1 = c(round(resul.lcar2.rw1[["mean"]][["lambda.1"]], 3),
@@ -3354,7 +3354,7 @@ datos.tabla <- data.frame(
                 round(resul.lcar2.rw1[["mean"]][["lambda.2"]], 3),
                 ic_lcar2.rw1_lambda2,
                 round(resul.lcar2.rw1[["DIC"]], 3),
-                round(cociente_varianzas[1, 3, 1], 3)
+                round(cociente_varianzas[1, 3, 7], 3)
                 ),
   
   LCAR2.RW2 = c(round(resul.lcar2.rw2[["mean"]][["lambda.1"]], 3),
@@ -3362,14 +3362,14 @@ datos.tabla <- data.frame(
                 round(resul.lcar2.rw2[["mean"]][["lambda.2"]], 3),
                 ic_lcar2.rw2_lambda1,
                 round(resul.lcar2.rw2[["DIC"]], 3),
-                round(cociente_varianzas[1, 4, 1], 3)
+                round(cociente_varianzas[1, 4, 7], 3)
                 ),
   
   LCAR1.PRIV = c(round(resul.lcar1.priv[["mean"]][["lambda.1"]], 3),
                  ic_lcar1.priv,
                  "-", "-",
                  round(resul.lcar1.priv[["DIC"]], 3),
-                 round(cociente_varianzas[1, 1, 1], 3)
+                 round(cociente_varianzas[1, 1, 7], 3)
                  )
   )
 
@@ -3426,7 +3426,7 @@ datos.tabla <- data.frame(
                  ic_lcar1,
                  "-", "-",
                  round(resul.lcar1[["DIC"]], 3),
-                 round(cociente_varianzas[1, 2, 1], 3)
+                 round(cociente_varianzas[1, 2, 8], 3)
             ),
   
   LCAR2.RW1 = c(round(resul.lcar2.rw1[["mean"]][["lambda.1"]], 3),
@@ -3434,7 +3434,7 @@ datos.tabla <- data.frame(
                 round(resul.lcar2.rw1[["mean"]][["lambda.2"]], 3),
                 ic_lcar2.rw1_lambda2,
                 round(resul.lcar2.rw1[["DIC"]], 3),
-                round(cociente_varianzas[1, 3, 1], 3)
+                round(cociente_varianzas[1, 3, 8], 3)
                 ),
   
   LCAR2.RW2 = c(round(resul.lcar2.rw2[["mean"]][["lambda.1"]], 3),
@@ -3442,14 +3442,14 @@ datos.tabla <- data.frame(
                 round(resul.lcar2.rw2[["mean"]][["lambda.2"]], 3),
                 ic_lcar2.rw2_lambda1,
                 round(resul.lcar2.rw2[["DIC"]], 3),
-                round(cociente_varianzas[1, 4, 1], 3)
+                round(cociente_varianzas[1, 4, 8], 3)
                 ),
   
   LCAR1.PRIV = c(round(resul.lcar1.priv[["mean"]][["lambda.1"]], 3),
                  ic_lcar1.priv,
                  "-", "-",
                  round(resul.lcar1.priv[["DIC"]], 3),
-                 round(cociente_varianzas[1, 1, 1], 3)
+                 round(cociente_varianzas[1, 1, 8], 3)
                  )
   )
 
@@ -3506,7 +3506,7 @@ datos.tabla <- data.frame(
                  ic_lcar1,
                  "-", "-",
                  round(resul.lcar1[["DIC"]], 3),
-                 round(cociente_varianzas[1, 2, 1], 3)
+                 round(cociente_varianzas[1, 2, 9], 3)
             ),
   
   LCAR2.RW1 = c(round(resul.lcar2.rw1[["mean"]][["lambda.1"]], 3),
@@ -3514,7 +3514,7 @@ datos.tabla <- data.frame(
                 round(resul.lcar2.rw1[["mean"]][["lambda.2"]], 3),
                 ic_lcar2.rw1_lambda2,
                 round(resul.lcar2.rw1[["DIC"]], 3),
-                round(cociente_varianzas[1, 3, 1], 3)
+                round(cociente_varianzas[1, 3, 9], 3)
                 ),
   
   LCAR2.RW2 = c(round(resul.lcar2.rw2[["mean"]][["lambda.1"]], 3),
@@ -3522,14 +3522,14 @@ datos.tabla <- data.frame(
                 round(resul.lcar2.rw2[["mean"]][["lambda.2"]], 3),
                 ic_lcar2.rw2_lambda1,
                 round(resul.lcar2.rw2[["DIC"]], 3),
-                round(cociente_varianzas[1, 4, 1], 3)
+                round(cociente_varianzas[1, 4, 9], 3)
                 ),
   
   LCAR1.PRIV = c(round(resul.lcar1.priv[["mean"]][["lambda.1"]], 3),
                  ic_lcar1.priv,
                  "-", "-",
                  round(resul.lcar1.priv[["DIC"]], 3),
-                 round(cociente_varianzas[1, 1, 1], 3)
+                 round(cociente_varianzas[1, 1, 9], 3)
                  )
   )
 
@@ -3586,7 +3586,7 @@ datos.tabla <- data.frame(
                  ic_lcar1,
                  "-", "-",
                  round(resul.lcar1[["DIC"]], 3),
-                 round(cociente_varianzas[1, 2, 1], 3)
+                 round(cociente_varianzas[1, 2, 10], 3)
             ),
   
   LCAR2.RW1 = c(round(resul.lcar2.rw1[["mean"]][["lambda.1"]], 3),
@@ -3594,7 +3594,7 @@ datos.tabla <- data.frame(
                 round(resul.lcar2.rw1[["mean"]][["lambda.2"]], 3),
                 ic_lcar2.rw1_lambda2,
                 round(resul.lcar2.rw1[["DIC"]], 3),
-                round(cociente_varianzas[1, 3, 1], 3)
+                round(cociente_varianzas[1, 3, 10], 3)
                 ),
   
   LCAR2.RW2 = c(round(resul.lcar2.rw2[["mean"]][["lambda.1"]], 3),
@@ -3602,14 +3602,14 @@ datos.tabla <- data.frame(
                 round(resul.lcar2.rw2[["mean"]][["lambda.2"]], 3),
                 ic_lcar2.rw2_lambda1,
                 round(resul.lcar2.rw2[["DIC"]], 3),
-                round(cociente_varianzas[1, 4, 1], 3)
+                round(cociente_varianzas[1, 4, 10], 3)
                 ),
   
   LCAR1.PRIV = c(round(resul.lcar1.priv[["mean"]][["lambda.1"]], 3),
                  ic_lcar1.priv,
                  "-", "-",
                  round(resul.lcar1.priv[["DIC"]], 3),
-                 round(cociente_varianzas[1, 1, 1], 3)
+                 round(cociente_varianzas[1, 1, 10], 3)
                  )
   )
 
@@ -3666,7 +3666,7 @@ datos.tabla <- data.frame(
                  ic_lcar1,
                  "-", "-",
                  round(resul.lcar1[["DIC"]], 3),
-                 round(cociente_varianzas[1, 2, 1], 3)
+                 round(cociente_varianzas[1, 2, 11], 3)
             ),
   
   LCAR2.RW1 = c(round(resul.lcar2.rw1[["mean"]][["lambda.1"]], 3),
@@ -3674,7 +3674,7 @@ datos.tabla <- data.frame(
                 round(resul.lcar2.rw1[["mean"]][["lambda.2"]], 3),
                 ic_lcar2.rw1_lambda2,
                 round(resul.lcar2.rw1[["DIC"]], 3),
-                round(cociente_varianzas[1, 3, 1], 3)
+                round(cociente_varianzas[1, 3, 11], 3)
                 ),
   
   LCAR2.RW2 = c(round(resul.lcar2.rw2[["mean"]][["lambda.1"]], 3),
@@ -3682,14 +3682,14 @@ datos.tabla <- data.frame(
                 round(resul.lcar2.rw2[["mean"]][["lambda.2"]], 3),
                 ic_lcar2.rw2_lambda1,
                 round(resul.lcar2.rw2[["DIC"]], 3),
-                round(cociente_varianzas[1, 4, 1], 3)
+                round(cociente_varianzas[1, 4, 11], 3)
                 ),
   
   LCAR1.PRIV = c(round(resul.lcar1.priv[["mean"]][["lambda.1"]], 3),
                  ic_lcar1.priv,
                  "-", "-",
                  round(resul.lcar1.priv[["DIC"]], 3),
-                 round(cociente_varianzas[1, 1, 1], 3)
+                 round(cociente_varianzas[1, 1, 11], 3)
                  )
   )
 
@@ -3746,7 +3746,7 @@ datos.tabla <- data.frame(
                  ic_lcar1,
                  "-", "-",
                  round(resul.lcar1[["DIC"]], 3),
-                 round(cociente_varianzas[1, 2, 1], 3)
+                 round(cociente_varianzas[1, 2, 12], 3)
             ),
   
   LCAR2.RW1 = c(round(resul.lcar2.rw1[["mean"]][["lambda.1"]], 3),
@@ -3754,7 +3754,7 @@ datos.tabla <- data.frame(
                 round(resul.lcar2.rw1[["mean"]][["lambda.2"]], 3),
                 ic_lcar2.rw1_lambda2,
                 round(resul.lcar2.rw1[["DIC"]], 3),
-                round(cociente_varianzas[1, 3, 1], 3)
+                round(cociente_varianzas[1, 3, 12], 3)
                 ),
   
   LCAR2.RW2 = c(round(resul.lcar2.rw2[["mean"]][["lambda.1"]], 3),
@@ -3762,14 +3762,14 @@ datos.tabla <- data.frame(
                 round(resul.lcar2.rw2[["mean"]][["lambda.2"]], 3),
                 ic_lcar2.rw2_lambda1,
                 round(resul.lcar2.rw2[["DIC"]], 3),
-                round(cociente_varianzas[1, 4, 1], 3)
+                round(cociente_varianzas[1, 4, 12], 3)
                 ),
   
   LCAR1.PRIV = c(round(resul.lcar1.priv[["mean"]][["lambda.1"]], 3),
                  ic_lcar1.priv,
                  "-", "-",
                  round(resul.lcar1.priv[["DIC"]], 3),
-                 round(cociente_varianzas[1, 1, 1], 3)
+                 round(cociente_varianzas[1, 1, 12], 3)
                  )
   )
 
@@ -3826,7 +3826,7 @@ datos.tabla <- data.frame(
                  ic_lcar1,
                  "-", "-",
                  round(resul.lcar1[["DIC"]], 3),
-                 round(cociente_varianzas[1, 2, 1], 3)
+                 round(cociente_varianzas[1, 2, 13], 3)
             ),
   
   LCAR2.RW1 = c(round(resul.lcar2.rw1[["mean"]][["lambda.1"]], 3),
@@ -3834,7 +3834,7 @@ datos.tabla <- data.frame(
                 round(resul.lcar2.rw1[["mean"]][["lambda.2"]], 3),
                 ic_lcar2.rw1_lambda2,
                 round(resul.lcar2.rw1[["DIC"]], 3),
-                round(cociente_varianzas[1, 3, 1], 3)
+                round(cociente_varianzas[1, 3, 13], 3)
                 ),
   
   LCAR2.RW2 = c(round(resul.lcar2.rw2[["mean"]][["lambda.1"]], 3),
@@ -3842,14 +3842,14 @@ datos.tabla <- data.frame(
                 round(resul.lcar2.rw2[["mean"]][["lambda.2"]], 3),
                 ic_lcar2.rw2_lambda1,
                 round(resul.lcar2.rw2[["DIC"]], 3),
-                round(cociente_varianzas[1, 4, 1], 3)
+                round(cociente_varianzas[1, 4, 13], 3)
                 ),
   
   LCAR1.PRIV = c(round(resul.lcar1.priv[["mean"]][["lambda.1"]], 3),
                  ic_lcar1.priv,
                  "-", "-",
                  round(resul.lcar1.priv[["DIC"]], 3),
-                 round(cociente_varianzas[1, 1, 1], 3)
+                 round(cociente_varianzas[1, 1, 13], 3)
                  )
   )
 
@@ -3906,7 +3906,7 @@ datos.tabla <- data.frame(
                  ic_lcar1,
                  "-", "-",
                  round(resul.lcar1[["DIC"]], 3),
-                 round(cociente_varianzas[1, 2, 1], 3)
+                 round(cociente_varianzas[1, 2, 14], 3)
             ),
   
   LCAR2.RW1 = c(round(resul.lcar2.rw1[["mean"]][["lambda.1"]], 3),
@@ -3914,7 +3914,7 @@ datos.tabla <- data.frame(
                 round(resul.lcar2.rw1[["mean"]][["lambda.2"]], 3),
                 ic_lcar2.rw1_lambda2,
                 round(resul.lcar2.rw1[["DIC"]], 3),
-                round(cociente_varianzas[1, 3, 1], 3)
+                round(cociente_varianzas[1, 3, 14], 3)
                 ),
   
   LCAR2.RW2 = c(round(resul.lcar2.rw2[["mean"]][["lambda.1"]], 3),
@@ -3922,14 +3922,14 @@ datos.tabla <- data.frame(
                 round(resul.lcar2.rw2[["mean"]][["lambda.2"]], 3),
                 ic_lcar2.rw2_lambda1,
                 round(resul.lcar2.rw2[["DIC"]], 3),
-                round(cociente_varianzas[1, 4, 1], 3)
+                round(cociente_varianzas[1, 4, 14], 3)
                 ),
   
   LCAR1.PRIV = c(round(resul.lcar1.priv[["mean"]][["lambda.1"]], 3),
                  ic_lcar1.priv,
                  "-", "-",
                  round(resul.lcar1.priv[["DIC"]], 3),
-                 round(cociente_varianzas[1, 1, 1], 3)
+                 round(cociente_varianzas[1, 1, 14], 3)
                  )
   )
 
@@ -3986,7 +3986,7 @@ datos.tabla <- data.frame(
                  ic_lcar1,
                  "-", "-",
                  round(resul.lcar1[["DIC"]], 3),
-                 round(cociente_varianzas[1, 2, 1], 3)
+                 round(cociente_varianzas[1, 2, 15], 3)
             ),
   
   LCAR2.RW1 = c(round(resul.lcar2.rw1[["mean"]][["lambda.1"]], 3),
@@ -3994,7 +3994,7 @@ datos.tabla <- data.frame(
                 round(resul.lcar2.rw1[["mean"]][["lambda.2"]], 3),
                 ic_lcar2.rw1_lambda2,
                 round(resul.lcar2.rw1[["DIC"]], 3),
-                round(cociente_varianzas[1, 3, 1], 3)
+                round(cociente_varianzas[1, 3, 15], 3)
                 ),
   
   LCAR2.RW2 = c(round(resul.lcar2.rw2[["mean"]][["lambda.1"]], 3),
@@ -4002,14 +4002,14 @@ datos.tabla <- data.frame(
                 round(resul.lcar2.rw2[["mean"]][["lambda.2"]], 3),
                 ic_lcar2.rw2_lambda1,
                 round(resul.lcar2.rw2[["DIC"]], 3),
-                round(cociente_varianzas[1, 4, 1], 3)
+                round(cociente_varianzas[1, 4, 15], 3)
                 ),
   
   LCAR1.PRIV = c(round(resul.lcar1.priv[["mean"]][["lambda.1"]], 3),
                  ic_lcar1.priv,
                  "-", "-",
                  round(resul.lcar1.priv[["DIC"]], 3),
-                 round(cociente_varianzas[1, 1, 1], 3)
+                 round(cociente_varianzas[1, 1, 15], 3)
                  )
   )
 
@@ -4066,7 +4066,7 @@ datos.tabla <- data.frame(
                  ic_lcar1,
                  "-", "-",
                  round(resul.lcar1[["DIC"]], 3),
-                 round(cociente_varianzas[1, 2, 1], 3)
+                 round(cociente_varianzas[1, 2, 16], 3)
             ),
   
   LCAR2.RW1 = c(round(resul.lcar2.rw1[["mean"]][["lambda.1"]], 3),
@@ -4074,7 +4074,7 @@ datos.tabla <- data.frame(
                 round(resul.lcar2.rw1[["mean"]][["lambda.2"]], 3),
                 ic_lcar2.rw1_lambda2,
                 round(resul.lcar2.rw1[["DIC"]], 3),
-                round(cociente_varianzas[1, 3, 1], 3)
+                round(cociente_varianzas[1, 3, 16], 3)
                 ),
   
   LCAR2.RW2 = c(round(resul.lcar2.rw2[["mean"]][["lambda.1"]], 3),
@@ -4082,14 +4082,14 @@ datos.tabla <- data.frame(
                 round(resul.lcar2.rw2[["mean"]][["lambda.2"]], 3),
                 ic_lcar2.rw2_lambda1,
                 round(resul.lcar2.rw2[["DIC"]], 3),
-                round(cociente_varianzas[1, 4, 1], 3)
+                round(cociente_varianzas[1, 4, 16], 3)
                 ),
   
   LCAR1.PRIV = c(round(resul.lcar1.priv[["mean"]][["lambda.1"]], 3),
                  ic_lcar1.priv,
                  "-", "-",
                  round(resul.lcar1.priv[["DIC"]], 3),
-                 round(cociente_varianzas[1, 1, 1], 3)
+                 round(cociente_varianzas[1, 1, 16], 3)
                  )
   )
 
@@ -4146,7 +4146,7 @@ datos.tabla <- data.frame(
                  ic_lcar1,
                  "-", "-",
                  round(resul.lcar1[["DIC"]], 3),
-                 round(cociente_varianzas[1, 2, 1], 3)
+                 round(cociente_varianzas[1, 2, 17], 3)
             ),
   
   LCAR2.RW1 = c(round(resul.lcar2.rw1[["mean"]][["lambda.1"]], 3),
@@ -4154,7 +4154,7 @@ datos.tabla <- data.frame(
                 round(resul.lcar2.rw1[["mean"]][["lambda.2"]], 3),
                 ic_lcar2.rw1_lambda2,
                 round(resul.lcar2.rw1[["DIC"]], 3),
-                round(cociente_varianzas[1, 3, 1], 3)
+                round(cociente_varianzas[1, 3, 17], 3)
                 ),
   
   LCAR2.RW2 = c(round(resul.lcar2.rw2[["mean"]][["lambda.1"]], 3),
@@ -4162,14 +4162,14 @@ datos.tabla <- data.frame(
                 round(resul.lcar2.rw2[["mean"]][["lambda.2"]], 3),
                 ic_lcar2.rw2_lambda1,
                 round(resul.lcar2.rw2[["DIC"]], 3),
-                round(cociente_varianzas[1, 4, 1], 3)
+                round(cociente_varianzas[1, 4, 17], 3)
                 ),
   
   LCAR1.PRIV = c(round(resul.lcar1.priv[["mean"]][["lambda.1"]], 3),
                  ic_lcar1.priv,
                  "-", "-",
                  round(resul.lcar1.priv[["DIC"]], 3),
-                 round(cociente_varianzas[1, 1, 1], 3)
+                 round(cociente_varianzas[1, 1, 17], 3)
                  )
   )
 
@@ -4226,7 +4226,7 @@ datos.tabla <- data.frame(
                  ic_lcar1,
                  "-", "-",
                  round(resul.lcar1[["DIC"]], 3),
-                 round(cociente_varianzas[1, 2, 1], 3)
+                 round(cociente_varianzas[1, 2, 18], 3)
             ),
   
   LCAR2.RW1 = c(round(resul.lcar2.rw1[["mean"]][["lambda.1"]], 3),
@@ -4234,7 +4234,7 @@ datos.tabla <- data.frame(
                 round(resul.lcar2.rw1[["mean"]][["lambda.2"]], 3),
                 ic_lcar2.rw1_lambda2,
                 round(resul.lcar2.rw1[["DIC"]], 3),
-                round(cociente_varianzas[1, 3, 1], 3)
+                round(cociente_varianzas[1, 3, 18], 3)
                 ),
   
   LCAR2.RW2 = c(round(resul.lcar2.rw2[["mean"]][["lambda.1"]], 3),
@@ -4242,14 +4242,14 @@ datos.tabla <- data.frame(
                 round(resul.lcar2.rw2[["mean"]][["lambda.2"]], 3),
                 ic_lcar2.rw2_lambda1,
                 round(resul.lcar2.rw2[["DIC"]], 3),
-                round(cociente_varianzas[1, 4, 1], 3)
+                round(cociente_varianzas[1, 4, 18], 3)
                 ),
   
   LCAR1.PRIV = c(round(resul.lcar1.priv[["mean"]][["lambda.1"]], 3),
                  ic_lcar1.priv,
                  "-", "-",
                  round(resul.lcar1.priv[["DIC"]], 3),
-                 round(cociente_varianzas[1, 1, 1], 3)
+                 round(cociente_varianzas[1, 1, 18], 3)
                  )
   )
 
@@ -4306,7 +4306,7 @@ datos.tabla <- data.frame(
                  ic_lcar1,
                  "-", "-",
                  round(resul.lcar1[["DIC"]], 3),
-                 round(cociente_varianzas[1, 2, 1], 3)
+                 round(cociente_varianzas[1, 2, 19], 3)
             ),
   
   LCAR2.RW1 = c(round(resul.lcar2.rw1[["mean"]][["lambda.1"]], 3),
@@ -4314,7 +4314,7 @@ datos.tabla <- data.frame(
                 round(resul.lcar2.rw1[["mean"]][["lambda.2"]], 3),
                 ic_lcar2.rw1_lambda2,
                 round(resul.lcar2.rw1[["DIC"]], 3),
-                round(cociente_varianzas[1, 3, 1], 3)
+                round(cociente_varianzas[1, 3, 19], 3)
                 ),
   
   LCAR2.RW2 = c(round(resul.lcar2.rw2[["mean"]][["lambda.1"]], 3),
@@ -4322,14 +4322,14 @@ datos.tabla <- data.frame(
                 round(resul.lcar2.rw2[["mean"]][["lambda.2"]], 3),
                 ic_lcar2.rw2_lambda1,
                 round(resul.lcar2.rw2[["DIC"]], 3),
-                round(cociente_varianzas[1, 4, 1], 3)
+                round(cociente_varianzas[1, 4, 19], 3)
                 ),
   
   LCAR1.PRIV = c(round(resul.lcar1.priv[["mean"]][["lambda.1"]], 3),
                  ic_lcar1.priv,
                  "-", "-",
                  round(resul.lcar1.priv[["DIC"]], 3),
-                 round(cociente_varianzas[1, 1, 1], 3)
+                 round(cociente_varianzas[1, 1, 19], 3)
                  )
   )
 
@@ -4385,7 +4385,7 @@ datos.tabla <- data.frame(
                  ic_lcar1,
                  "-", "-",
                  round(resul.lcar1[["DIC"]], 3),
-                 round(cociente_varianzas[1, 2, 1], 3)
+                 round(cociente_varianzas[1, 2, 20], 3)
             ),
   
   LCAR2.RW1 = c(round(resul.lcar2.rw1[["mean"]][["lambda.1"]], 3),
@@ -4393,7 +4393,7 @@ datos.tabla <- data.frame(
                 round(resul.lcar2.rw1[["mean"]][["lambda.2"]], 3),
                 ic_lcar2.rw1_lambda2,
                 round(resul.lcar2.rw1[["DIC"]], 3),
-                round(cociente_varianzas[1, 3, 1], 3)
+                round(cociente_varianzas[1, 3, 20], 3)
                 ),
   
   LCAR2.RW2 = c(round(resul.lcar2.rw2[["mean"]][["lambda.1"]], 3),
@@ -4401,14 +4401,14 @@ datos.tabla <- data.frame(
                 round(resul.lcar2.rw2[["mean"]][["lambda.2"]], 3),
                 ic_lcar2.rw2_lambda1,
                 round(resul.lcar2.rw2[["DIC"]], 3),
-                round(cociente_varianzas[1, 4, 1], 3)
+                round(cociente_varianzas[1, 4, 20], 3)
                 ),
   
   LCAR1.PRIV = c(round(resul.lcar1.priv[["mean"]][["lambda.1"]], 3),
                  ic_lcar1.priv,
                  "-", "-",
                  round(resul.lcar1.priv[["DIC"]], 3),
-                 round(cociente_varianzas[1, 1, 1], 3)
+                 round(cociente_varianzas[1, 1, 20], 3)
                  )
   )
 
@@ -4465,7 +4465,7 @@ datos.tabla <- data.frame(
                  ic_lcar1,
                  "-", "-",
                  round(resul.lcar1[["DIC"]], 3),
-                 round(cociente_varianzas[1, 2, 1], 3)
+                 round(cociente_varianzas[1, 2, 21], 3)
             ),
   
   LCAR2.RW1 = c(round(resul.lcar2.rw1[["mean"]][["lambda.1"]], 3),
@@ -4473,7 +4473,7 @@ datos.tabla <- data.frame(
                 round(resul.lcar2.rw1[["mean"]][["lambda.2"]], 3),
                 ic_lcar2.rw1_lambda2,
                 round(resul.lcar2.rw1[["DIC"]], 3),
-                round(cociente_varianzas[1, 3, 1], 3)
+                round(cociente_varianzas[1, 3, 21], 3)
                 ),
   
   LCAR2.RW2 = c(round(resul.lcar2.rw2[["mean"]][["lambda.1"]], 3),
@@ -4481,14 +4481,14 @@ datos.tabla <- data.frame(
                 round(resul.lcar2.rw2[["mean"]][["lambda.2"]], 3),
                 ic_lcar2.rw2_lambda1,
                 round(resul.lcar2.rw2[["DIC"]], 3),
-                round(cociente_varianzas[1, 4, 1], 3)
+                round(cociente_varianzas[1, 4, 21], 3)
                 ),
   
   LCAR1.PRIV = c(round(resul.lcar1.priv[["mean"]][["lambda.1"]], 3),
                  ic_lcar1.priv,
                  "-", "-",
                  round(resul.lcar1.priv[["DIC"]], 3),
-                 round(cociente_varianzas[1, 1, 1], 3)
+                 round(cociente_varianzas[1, 1, 21], 3)
                  )
   )
 
@@ -4545,7 +4545,7 @@ datos.tabla <- data.frame(
                  ic_lcar1,
                  "-", "-",
                  round(resul.lcar1[["DIC"]], 3),
-                 round(cociente_varianzas[1, 2, 1], 3)
+                 round(cociente_varianzas[1, 2, 22], 3)
             ),
   
   LCAR2.RW1 = c(round(resul.lcar2.rw1[["mean"]][["lambda.1"]], 3),
@@ -4553,7 +4553,7 @@ datos.tabla <- data.frame(
                 round(resul.lcar2.rw1[["mean"]][["lambda.2"]], 3),
                 ic_lcar2.rw1_lambda2,
                 round(resul.lcar2.rw1[["DIC"]], 3),
-                round(cociente_varianzas[1, 3, 1], 3)
+                round(cociente_varianzas[1, 3, 22], 3)
                 ),
   
   LCAR2.RW2 = c(round(resul.lcar2.rw2[["mean"]][["lambda.1"]], 3),
@@ -4561,14 +4561,14 @@ datos.tabla <- data.frame(
                 round(resul.lcar2.rw2[["mean"]][["lambda.2"]], 3),
                 ic_lcar2.rw2_lambda1,
                 round(resul.lcar2.rw2[["DIC"]], 3),
-                round(cociente_varianzas[1, 4, 1], 3)
+                round(cociente_varianzas[1, 4, 22], 3)
                 ),
   
   LCAR1.PRIV = c(round(resul.lcar1.priv[["mean"]][["lambda.1"]], 3),
                  ic_lcar1.priv,
                  "-", "-",
                  round(resul.lcar1.priv[["DIC"]], 3),
-                 round(cociente_varianzas[1, 1, 1], 3)
+                 round(cociente_varianzas[1, 1, 22], 3)
                  )
   )
 
